@@ -60,7 +60,7 @@ let featuredIsTransitioning = false;
 let featuredPopupAutoOpened = false;
 const API_BASE =
   String(window.location.hostname || "").toLowerCase().endsWith("github.io")
-    ? "https://YOUR_BACKEND_DOMAIN"
+    ? "https://-pharmacy-website-env.up.railway.app"
     : "";
 
 function apiUrl(path) {
