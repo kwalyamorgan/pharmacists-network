@@ -28,6 +28,10 @@ const pharmacistsPanel = document.getElementById("pharmacistsPanel");
 let debounceTimer;
 let revealObserver;
 const preloadStartedAt = Date.now();
+const isCompactViewport = window.matchMedia("(max-width: 720px)").matches;
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const saveDataEnabled = Boolean(navigator.connection && navigator.connection.saveData);
+const shouldFastLoadUi = isCompactViewport || prefersReducedMotion || saveDataEnabled;
 const API_BASE = (() => {
   const injected = String(window.__API_BASE__ || document.documentElement?.dataset?.apiBase || "").trim();
   if (injected) {
@@ -230,7 +234,8 @@ function setupScrollEffects() {
 
 function completePreloader() {
   const elapsed = Date.now() - preloadStartedAt;
-  const remaining = Math.max(0, 650 - elapsed);
+  const minPreloadDuration = shouldFastLoadUi ? 120 : 650;
+  const remaining = Math.max(0, minPreloadDuration - elapsed);
 
   window.setTimeout(() => {
     preloader.classList.add("is-hidden");
@@ -285,7 +290,7 @@ async function loadNews() {
   try {
     setStatus("Loading live pharmacy updates...");
 
-    const defaultLimit = 200;
+    const defaultLimit = isCompactViewport ? 80 : 160;
 
     const q = encodeURIComponent(searchInput.value.trim());
     const category = encodeURIComponent(categorySelect.value);
