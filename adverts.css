@@ -306,8 +306,6 @@ body.admin-enabled .adverts-admin-actions {
   background: rgba(255, 255, 255, 0.92);
   box-shadow: var(--shadow);
   display: grid;
-  content-visibility: auto;
-  contain-intrinsic-size: 360px;
 }
 
 .adverts-media {
@@ -892,6 +890,17 @@ textarea:focus {
 }
 
 @media (max-width: 720px) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
   .adverts-item,
   .adverts-featured,
   .adverts-card,

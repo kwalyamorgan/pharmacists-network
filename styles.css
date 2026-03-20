@@ -897,6 +897,17 @@ body.compact-ui .news-card {
 }
 
 @media (max-width: 720px) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
   .bg-shape {
     display: none;
   }
