@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kenyan Pharmacists Professional Network</title>
+    <link rel="icon" type="image/x-icon" href="logo/logo.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="logo/logo.png" />
+    <link rel="apple-touch-icon" href="logo/logo.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="is-loading">
+    <div id="preloader" class="preloader" aria-hidden="true">
+      <div class="preloader-panel">
+        <p class="preloader-kicker">Kenyan Pharmacists Network</p>
+        <h2>Preparing live pharmacy intelligence</h2>
+        <div class="preloader-track" role="presentation">
+          <span class="preloader-fill"></span>
+        </div>
+      </div>
+    </div>
+
+    <div id="scrollProgress" class="scroll-progress" aria-hidden="true"></div>
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+
+    <header class="hero reveal-block">
+      <div class="site-brand" aria-label="Site brand">
+        <img class="site-brand-logo" src="logo/logo.png" alt="Kenyan Pharmacists Professional Network logo" width="48" height="48" />
+      </div>
+      <p class="hero-kicker">Kenyan Pharmacists Professional Network</p>
+      <h1>Keep Ahead. Stay Informed.</h1>
+      <h2>An Informed Pharmacist is a Leading Pharmacist.</h2>
+      <p class="hero-text">
+        Access curated insights from the Pharmacy and Poisons Board (PPB), Pharmaceutical Society of Kenya (PSK), Kenya Medical Association (KMA), WHO, leading global pharmaceutical companies, and top pharmacy research journals.<span class="hero-highlight">All in one place</span>
+      </p>
+
+    </header>
+
+    <section class="entry-row reveal-block" aria-label="Student and pharmacist resources">
+      <section class="student-entry" aria-label="Student resources">
+        <button
+          id="studentsToggleBtn"
+          class="btn btn-students"
+          type="button"
+          aria-expanded="false"
+          aria-controls="studentsPanel"
+        >
+          Students
+        </button>
+
+        <div id="studentsPanel" class="students-panel" hidden>
+          <p class="students-kicker">Student quick links</p>
+          <div class="students-grid">
+            <a
+              class="students-link"
+              href="https://kephsaresearchhub.co.ke"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="students-title">KEPhSA Research Hub</span>
+              <span class="students-desc">Research updates, student resources, and pharmacy insights.</span>
+            </a>
+
+            <a class="students-link" href="https://kephsa.com" target="_blank" rel="noopener noreferrer">
+              <span class="students-title">KEPhSA</span>
+              <span class="students-desc">Official site for news, initiatives, and membership information.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="student-entry" aria-label="Pharmacist resources">
+        <button
+          id="pharmacistsToggleBtn"
+          class="btn btn-students"
+          type="button"
+          aria-expanded="false"
+          aria-controls="pharmacistsPanel"
+        >
+          Pharmacists
+        </button>
+
+        <div id="pharmacistsPanel" class="students-panel" hidden>
+          <p class="students-kicker">Pharmacist quick links</p>
+          <div class="students-grid">
+            <a class="students-link" href="https://psk.or.ke" target="_blank" rel="noopener noreferrer">
+              <span class="students-title">Pharmaceutical Society of Kenya (PSK)</span>
+              <span class="students-desc">Professional updates, events, and member resources.</span>
+            </a>
+
+            <a
+              class="students-link"
+              href="https://web.pharmacyboardkenya.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="students-title">Pharmacy and Poisons Board (PPB)</span>
+              <span class="students-desc">Regulatory portal and official board information.</span>
+            </a>
+
+            <a class="students-link" href="https://kpa.or.ke/" target="_blank" rel="noopener noreferrer">
+              <span class="students-title">Kenya Pharmaceutical Association (KPA)</span>
+              <span class="students-desc">Industry news, advocacy, and sector initiatives.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <main class="container reveal-block">
+      <section class="toolbar reveal-block" aria-label="Search and filters">
+        <div class="toolbar-search-wrap">
+          <label class="sr-only" for="searchInput">Search</label>
+          <input id="searchInput" class="toolbar-search" type="text" placeholder="Search: diabetes, regulation, trial" />
+        </div>
+        <button id="filterToggleBtn" class="btn btn-filter" type="button" aria-expanded="false" aria-controls="filterMenu">
+          Filter
+        </button>
+
+        <a class="btn btn-filter" href="adverts.html">Adverts</a>
+
+        <div id="filterMenu" class="filter-menu" role="dialog" aria-label="Filter options" hidden>
+          <div class="filter-menu-head">
+            <p class="controls-kicker">Filter by</p>
+            <button id="closeFilterBtn" class="menu-close" type="button" aria-label="Close filters">Close</button>
+          </div>
+
+          <div class="filter-grid">
+            <div class="field">
+              <label for="categorySelect">Category</label>
+              <select id="categorySelect">
+                <option value="all">All categories</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="sourceSelect">Source</label>
+              <select id="sourceSelect">
+                <option value="all">All sources</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="regionSelect">Region</label>
+              <select id="regionSelect">
+                <option value="all">Kenyan + Global</option>
+                <option value="kenyan">Kenyan</option>
+                <option value="global">Global</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="dateFromInput">
+                From date
+                <span class="label-hint">dd/mm/yyyy</span>
+              </label>
+              <input id="dateFromInput" type="date" />
+            </div>
+
+            <div class="field">
+              <label for="dateToInput">
+                To date
+                <span class="label-hint">dd/mm/yyyy</span>
+              </label>
+              <input id="dateToInput" type="date" />
+            </div>
+          </div>
+
+          <div class="filter-actions">
+            <button id="resetFiltersBtn" class="btn btn-ghost" type="button">Reset</button>
+            <button id="applyFiltersBtn" class="btn" type="button">Apply filters</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="quick-meta reveal-block" aria-label="Feed insights">
+        <div class="meta-pill">
+          <span class="meta-label">Stories</span>
+          <strong id="storyCount">0</strong>
+        </div>
+        <div class="meta-pill">
+          <span class="meta-label">Kenyan</span>
+          <strong id="kenyanCount">0</strong>
+        </div>
+        <div class="meta-pill">
+          <span class="meta-label">Global</span>
+          <strong id="globalCount">0</strong>
+        </div>
+      </section>
+
+      <section class="status-row reveal-block">
+        <p id="statusText">Loading latest updates...</p>
+        <p id="updatedText"></p>
+      </section>
+
+      <section id="newsFeed" class="news-grid reveal-block" aria-live="polite"></section>
+    </main>
+
+    <template id="cardTemplate">
+      <article class="news-card">
+        <div class="card-top">
+          <span class="category"></span>
+          <time class="published"></time>
+        </div>
+        <h2 class="title"></h2>
+        <p class="overview"></p>
+        <div class="card-bottom">
+          <span class="source-line">
+            <span class="source"></span>
+            <span class="region"></span>
+          </span>
+          <a class="read-link" target="_blank" rel="noopener noreferrer">Read story</a>
+        </div>
+      </article>
+    </template>
+
+    <button id="backToTopBtn" class="back-to-top" type="button" aria-label="Back to top">
+      Top
+    </button>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adverts</title>
+    <link rel="icon" type="image/x-icon" href="logo/logo.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="logo/logo.png" />
+    <link rel="apple-touch-icon" href="logo/logo.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="adverts.css" />
+  </head>
+  <body>
+    <header class="hero reveal-block">
+      <div class="site-brand" aria-label="Site brand">
+        <img class="site-brand-logo" src="logo/logo.png" alt="Kenyan Pharmacists Professional Network logo" width="48" height="48" />
+      </div>
+      <p class="hero-kicker">Kenyan Pharmacists Professional Network</p>
+      <h1>Adverts</h1>
+      <p class="hero-text">Post an advert and pay via Paystack to activate it.</p>
+      <div class="adverts-actions">
+        <a class="btn btn-filter" href="/">Back to news</a>
+        <button id="advertiseBtn" class="btn btn-filter" type="button">Advertise</button>
+      </div>
+    </header>
+
+    <main class="container reveal-block">
+      <section class="adverts-card" aria-label="Active adverts">
+        <div class="adverts-feed-head">
+          <h2 class="adverts-title">Active adverts</h2>
+          <div class="adverts-feed-tools">
+            <div id="adminPanel" class="adverts-admin-panel" hidden style="display:none">
+              <label class="sr-only" for="adminTokenInput">Admin token</label>
+              <input id="adminTokenInput" type="password" placeholder="Admin token" autocomplete="off" />
+              <button id="adminEnableBtn" class="btn btn-ghost" type="button">Admin</button>
+            </div>
+            <p id="feedStatus" class="adverts-hint"></p>
+          </div>
+        </div>
+
+        <section id="adsFeed" class="adverts-feed" aria-live="polite"></section>
+      </section>
+    </main>
+
+    <template id="adCardTemplate">
+      <article class="adverts-item" tabindex="0">
+        <div class="adverts-media"></div>
+        <section class="adverts-media-overlay" data-overlay>
+          <p class="adverts-badge" data-badge></p>
+          <p class="adverts-copy" data-copy></p>
+          <a class="adverts-link" data-link hidden rel="noopener noreferrer" target="_blank"></a>
+          <p class="adverts-meta" data-meta></p>
+        </section>
+        <div class="adverts-body">
+          <div class="adverts-admin-actions" data-admin-actions hidden style="display:none">
+            <button class="btn btn-ghost" type="button" data-admin-activate>Activate</button>
+            <button class="btn btn-ghost" type="button" data-admin-media>Edit media</button>
+            <button class="btn btn-ghost" type="button" data-admin-edit>Edit</button>
+            <button class="btn btn-ghost" type="button" data-admin-link>Edit link</button>
+            <button class="btn btn-ghost" type="button" data-admin-verify>Verify</button>
+            <button class="btn btn-ghost" type="button" data-admin-feature>Feature</button>
+            <button class="btn btn-ghost" type="button" data-admin-remove>Remove</button>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <dialog id="mediaViewerDialog" class="adverts-dialog adverts-media-dialog" aria-label="View media">
+      <div class="adverts-dialog-panel adverts-media-dialog-panel">
+        <div class="adverts-dialog-head">
+          <h2 class="adverts-title adverts-media-title">Media</h2>
+          <button id="closeMediaViewerBtn" class="menu-close" type="button">Close</button>
+        </div>
+        <div class="adverts-media-viewer">
+          <img id="mediaViewerImg" alt="Advert image" loading="lazy" />
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="featuredViewerDialog" class="adverts-dialog adverts-featured-dialog" aria-label="Featured adverts">
+      <div class="adverts-dialog-panel adverts-featured-dialog-panel">
+        <div class="adverts-dialog-head">
+          <div class="adverts-dialog-title-row">
+            <h2 class="adverts-title adverts-media-title">Featured</h2>
+            <p id="featuredPopupCount" class="adverts-hint"></p>
+          </div>
+          <button id="closeFeaturedViewerBtn" class="menu-close" type="button">Close</button>
+        </div>
+
+        <article id="featuredPopupFrame" class="adverts-featured-frame adverts-featured-popup-frame" aria-label="Featured advert slideshow">
+          <div id="featuredPopupMedia" class="adverts-featured-media" aria-live="polite"></div>
+        </article>
+
+        <section class="adverts-featured-popup-body" aria-label="Featured advert details">
+          <p id="featuredPopupBadge" class="adverts-badge"></p>
+          <p id="featuredPopupCopy" class="adverts-copy"></p>
+          <a id="featuredPopupLink" class="adverts-link" hidden rel="noopener noreferrer" target="_blank"></a>
+          <p id="featuredPopupMeta" class="adverts-meta"></p>
+        </section>
+      </div>
+    </dialog>
+
+    <dialog id="adDialog" class="adverts-dialog" aria-label="Create advert">
+      <form id="adForm" class="adverts-dialog-panel" method="dialog">
+        <div class="adverts-dialog-head">
+          <h2 class="adverts-title">Advertise</h2>
+          <button id="closeDialogBtn" class="menu-close" type="button">Close</button>
+        </div>
+
+        <label class="adverts-label" for="phoneInput">Phone number</label>
+        <input id="phoneInput" name="phone" type="tel" placeholder="e.g. 2547XXXXXXXX" required />
+
+        <label class="adverts-label" for="emailInput">Email (for payment)</label>
+        <input id="emailInput" name="email" type="email" placeholder="e.g. name@example.com" />
+
+        <label class="adverts-label" for="contentInput">Ad content</label>
+        <textarea id="contentInput" name="content" rows="5" placeholder="Write your advert..." required></textarea>
+
+        <label class="adverts-label" for="linkInput">Link (optional)</label>
+        <input id="linkInput" name="linkUrl" type="text" inputmode="url" placeholder="https://example.com" />
+
+        <div class="adverts-row">
+          <div class="adverts-field">
+            <label class="adverts-label" for="mediaTypeSelect">Advert type</label>
+            <select id="mediaTypeSelect" name="mediaType">
+              <option value="image">Image</option>
+              <option value="video">Video</option>
+            </select>
+            <p id="mediaHint" class="adverts-hint"></p>
+          </div>
+
+          <div class="adverts-field">
+            <label class="adverts-label" for="planSelect">Plan</label>
+            <select id="planSelect" name="plan">
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+            <p id="planHint" class="adverts-hint"></p>
+          </div>
+        </div>
+
+        <label class="adverts-label" for="mediaInput">Upload media (optional)</label>
+        <input id="mediaInput" name="media" type="file" accept="image/*,video/*" />
+
+        <label class="adverts-check">
+          <input id="featuredCheckbox" type="checkbox" />
+          <span>Feature (+KES 300)</span>
+        </label>
+
+        <div class="adverts-buttons">
+          <button id="createBtn" class="btn" type="submit">Create advert</button>
+          <button id="payBtn" class="btn" type="button" hidden>Pay with Paystack</button>
+        </div>
+
+        <section id="createdPreview" class="adverts-created-preview" hidden aria-label="Advert preview">
+          <h3 class="adverts-preview-title">Preview</h3>
+          <article class="adverts-preview-card">
+            <div id="createdPreviewMedia" class="adverts-preview-media"></div>
+            <div class="adverts-preview-body">
+              <p id="createdPreviewCopy" class="adverts-preview-copy"></p>
+              <a id="createdPreviewLink" class="adverts-preview-link" hidden rel="noopener noreferrer" target="_blank"></a>
+            </div>
+          </article>
+        </section>
+
+        <div id="adStatus" class="adverts-status" role="status" aria-live="polite"></div>
+        <p class="adverts-hint" id="paymentSummary"></p>
+      </form>
+    </dialog>
+
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script src="adverts.js"></script>
+  </body>
+</html>
