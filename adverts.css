@@ -1,7 +1,46 @@
+.adverts-support {
+  margin: 12px 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, white);
+  border-radius: 999px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, white), color-mix(in srgb, var(--bg-alt) 60%, white));
+  color: color-mix(in srgb, var(--text) 86%, black);
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(20, 60, 42, 0.12);
+}
+
+.adverts-support-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--accent-strong) 82%, black);
+  border-bottom: 2px solid color-mix(in srgb, var(--accent-strong) 35%, transparent);
+  transition: color 180ms ease, border-color 180ms ease;
+}
+
+.adverts-support-link:hover,
+.adverts-support-link:focus-visible {
+  color: color-mix(in srgb, var(--accent-strong) 94%, black);
+  border-bottom-color: color-mix(in srgb, var(--accent-strong) 65%, transparent);
+}
+
 .adverts-actions {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .adverts-support {
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+  }
 }
 
 .adverts-featured {
