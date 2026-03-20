@@ -58,10 +58,15 @@ let featuredSlideIndex = 0;
 let featuredTimer = null;
 let featuredIsTransitioning = false;
 let featuredPopupAutoOpened = false;
-const API_BASE =
-  String(window.location.hostname || "").toLowerCase().endsWith("github.io")
-    ? "https://-pharmacy-website-env.up.railway.app"
+const API_BASE = (() => {
+  const injected = String(window.__API_BASE__ || document.documentElement?.dataset?.apiBase || "").trim();
+  if (injected) {
+    return injected;
+  }
+  return String(window.location.hostname || "").toLowerCase().endsWith("github.io")
+    ? "https://pharmacy-website-env.up.railway.app"
     : "";
+})();
 
 function apiUrl(path) {
   const base = API_BASE.replace(/\/+$/, "");

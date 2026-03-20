@@ -28,10 +28,15 @@ const pharmacistsPanel = document.getElementById("pharmacistsPanel");
 let debounceTimer;
 let revealObserver;
 const preloadStartedAt = Date.now();
-const API_BASE =
-  String(window.location.hostname || "").toLowerCase().endsWith("github.io")
-    ? "https://-pharmacy-website-env.up.railway.app"
+const API_BASE = (() => {
+  const injected = String(window.__API_BASE__ || document.documentElement?.dataset?.apiBase || "").trim();
+  if (injected) {
+    return injected;
+  }
+  return String(window.location.hostname || "").toLowerCase().endsWith("github.io")
+    ? "https://pharmacy-website-env.up.railway.app"
     : "";
+})();
 
 function apiUrl(path) {
   const base = API_BASE.replace(/\/+$/, "");
