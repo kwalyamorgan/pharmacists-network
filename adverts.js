@@ -59,6 +59,10 @@ let featuredSlideIndex = 0;
 let featuredTimer = null;
 let featuredIsTransitioning = false;
 let featuredPopupAutoOpened = false;
+let featuredTouchStartX = 0;
+let featuredTouchStartY = 0;
+let featuredTouchDeltaX = 0;
+let featuredTouchActive = false;
 const isCompactViewport = window.matchMedia("(max-width: 720px)").matches;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const saveDataEnabled = Boolean(navigator.connection && navigator.connection.saveData);
@@ -216,6 +220,9 @@ function closeFeaturedViewer() {
 }
 
 function maybeAutoOpenFeaturedViewer() {
+  if (shouldFastLoadUi) {
+    return;
+  }
   if (featuredPopupAutoOpened) {
     return;
   }
@@ -397,6 +404,90 @@ function transitionFeaturedToIndex(nextIndex) {
       }, 260);
     });
   }, 220);
+}
+
+function goToNextFeatured() {
+  if (featuredSlides.length <= 1) {
+    return;
+  }
+  const nextIndex = (featuredSlideIndex + 1) % featuredSlides.length;
+  transitionFeaturedToIndex(nextIndex);
+}
+
+function goToPreviousFeatured() {
+  if (featuredSlides.length <= 1) {
+    return;
+  }
+  const nextIndex = (featuredSlideIndex - 1 + featuredSlides.length) % featuredSlides.length;
+  transitionFeaturedToIndex(nextIndex);
+}
+
+function setupFeaturedSwipe() {
+  const swipeHost = featuredPopupFrame || featuredPopupMedia;
+  if (!swipeHost) {
+    return;
+  }
+
+  swipeHost.addEventListener(
+    "touchstart",
+    (event) => {
+      const point = event.touches?.[0];
+      if (!point) {
+        return;
+      }
+      featuredTouchStartX = point.clientX;
+      featuredTouchStartY = point.clientY;
+      featuredTouchDeltaX = 0;
+      featuredTouchActive = true;
+    },
+    { passive: true }
+  );
+
+  swipeHost.addEventListener(
+    "touchmove",
+    (event) => {
+      if (!featuredTouchActive) {
+        return;
+      }
+      const point = event.touches?.[0];
+      if (!point) {
+        return;
+      }
+      featuredTouchDeltaX = point.clientX - featuredTouchStartX;
+    },
+    { passive: true }
+  );
+
+  swipeHost.addEventListener(
+    "touchend",
+    (event) => {
+      if (!featuredTouchActive) {
+        return;
+      }
+
+      featuredTouchActive = false;
+
+      const point = event.changedTouches?.[0];
+      if (!point) {
+        return;
+      }
+
+      const deltaX = point.clientX - featuredTouchStartX;
+      const deltaY = point.clientY - featuredTouchStartY;
+
+      // Trigger only deliberate horizontal swipes.
+      if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) {
+        return;
+      }
+
+      if (deltaX < 0) {
+        goToNextFeatured();
+      } else {
+        goToPreviousFeatured();
+      }
+    },
+    { passive: true }
+  );
 }
 
 function setFeaturedSlidesFromItems(items) {
@@ -1180,6 +1271,11 @@ async function payForAdvert() {
 
 advertiseBtn?.addEventListener("click", openDialog);
 featuredViewerBtn?.addEventListener("click", () => {
+  if (featuredViewerDialog?.open) {
+    closeFeaturedViewer();
+    return;
+  }
+
   if (!featuredSlides.length) {
     setFeedStatus("No featured adverts right now.");
     return;
@@ -1285,6 +1381,7 @@ document.addEventListener("keydown", async (event) => {
     setAdminEnabled(false);
     setAdminUiVisible(false);
     setFeedStatus("Loading…");
+    setupFeaturedSwipe();
     await loadOffers();
     await loadFeed();
     try {
