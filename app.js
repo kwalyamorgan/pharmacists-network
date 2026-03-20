@@ -33,7 +33,13 @@ const API_BASE = (() => {
   if (injected) {
     return injected;
   }
-  return String(window.location.hostname || "").toLowerCase().endsWith("github.io")
+  const hostname = String(window.location.hostname || "").toLowerCase();
+  const useRailwayApi =
+    hostname.endsWith("github.io") ||
+    hostname === "kenyanpharmacistsnetwork.co.ke" ||
+    hostname === "www.kenyanpharmacistsnetwork.co.ke";
+
+  return useRailwayApi
     ? "https://pharmacy-website-env.up.railway.app"
     : "";
 })();
