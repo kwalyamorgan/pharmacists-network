@@ -1,4 +1,5 @@
 const advertiseBtn = document.getElementById("advertiseBtn");
+const featuredViewerBtn = document.getElementById("featuredViewerBtn");
 const adDialog = document.getElementById("adDialog");
 const closeDialogBtn = document.getElementById("closeDialogBtn");
 
@@ -215,9 +216,6 @@ function closeFeaturedViewer() {
 }
 
 function maybeAutoOpenFeaturedViewer() {
-  if (shouldFastLoadUi) {
-    return;
-  }
   if (featuredPopupAutoOpened) {
     return;
   }
@@ -405,6 +403,11 @@ function setFeaturedSlidesFromItems(items) {
   const nextSlides = (Array.isArray(items) ? items : []).filter((row) => Boolean(row?.isFeatured));
   featuredSlides = nextSlides;
   featuredSlideIndex = 0;
+
+  if (featuredViewerBtn) {
+    featuredViewerBtn.disabled = featuredSlides.length === 0;
+    featuredViewerBtn.hidden = featuredSlides.length === 0;
+  }
 
   renderFeaturedSlide();
   maybeAutoOpenFeaturedViewer();
@@ -1176,6 +1179,18 @@ async function payForAdvert() {
 }
 
 advertiseBtn?.addEventListener("click", openDialog);
+featuredViewerBtn?.addEventListener("click", () => {
+  if (!featuredSlides.length) {
+    setFeedStatus("No featured adverts right now.");
+    return;
+  }
+
+  try {
+    featuredViewerDialog?.showModal();
+  } catch {
+    featuredViewerDialog?.show();
+  }
+});
 closeDialogBtn?.addEventListener("click", closeDialog);
 closeMediaViewerBtn?.addEventListener("click", closeMediaViewer);
 closeFeaturedViewerBtn?.addEventListener("click", closeFeaturedViewer);
