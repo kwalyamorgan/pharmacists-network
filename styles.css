@@ -770,6 +770,17 @@ select:focus {
   transform: translateY(0);
 }
 
+body.compact-ui .reveal-block,
+body.compact-ui .news-card {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+body.compact-ui .news-card {
+  box-shadow: 0 5px 14px rgba(16, 44, 28, 0.1);
+}
+
 .empty,
 .error {
   grid-column: 1 / -1;

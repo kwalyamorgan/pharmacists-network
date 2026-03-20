@@ -27,6 +27,8 @@ const pharmacistsPanel = document.getElementById("pharmacistsPanel");
 
 let debounceTimer;
 let revealObserver;
+let scrollTicking = false;
+let newsRequestController = null;
 const preloadStartedAt = Date.now();
 const isCompactViewport = window.matchMedia("(max-width: 720px)").matches;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -178,6 +180,14 @@ function renderNews(items) {
 }
 
 function setupRevealObserver() {
+  if (shouldFastLoadUi) {
+    document.body.classList.add("compact-ui");
+    document.querySelectorAll(".reveal-block, .news-card").forEach((element) => {
+      element.classList.add("in-view");
+    });
+    return;
+  }
+
   revealObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -209,6 +219,7 @@ function observeElements(elements) {
 }
 
 function updateScrollUi() {
+  scrollTicking = false;
   const doc = document.documentElement;
   const maxScrollable = Math.max(doc.scrollHeight - window.innerHeight, 1);
   const currentY = window.scrollY;
@@ -222,10 +233,19 @@ function updateScrollUi() {
   }
 }
 
+function requestScrollUiUpdate() {
+  if (scrollTicking) {
+    return;
+  }
+
+  scrollTicking = true;
+  window.requestAnimationFrame(updateScrollUi);
+}
+
 function setupScrollEffects() {
   updateScrollUi();
-  window.addEventListener("scroll", updateScrollUi, { passive: true });
-  window.addEventListener("resize", updateScrollUi);
+  window.addEventListener("scroll", requestScrollUiUpdate, { passive: true });
+  window.addEventListener("resize", requestScrollUiUpdate, { passive: true });
 
   backToTopBtn.addEventListener("click", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -288,6 +308,11 @@ async function loadCategories() {
 
 async function loadNews() {
   try {
+    if (newsRequestController) {
+      newsRequestController.abort();
+    }
+    newsRequestController = new AbortController();
+
     setStatus("Loading live pharmacy updates...");
 
     const defaultLimit = isCompactViewport ? 80 : 160;
@@ -301,7 +326,10 @@ async function loadNews() {
     const response = await fetch(
       apiUrl(
         `/api/news?q=${q}&category=${category}&source=${source}&region=${region}&dateFrom=${dateFrom}&dateTo=${dateTo}&limit=${defaultLimit}`
-      )
+      ),
+      {
+        signal: newsRequestController.signal
+      }
     );
 
     if (!response.ok) {
@@ -314,10 +342,15 @@ async function loadNews() {
     const count = data.items?.length || 0;
     setStatus(`${count} stories loaded.`);
     updatedText.textContent = `Last update: ${formatDate(data.updatedAt)}`;
+    newsRequestController = null;
   } catch (error) {
+    if (error?.name === "AbortError") {
+      return;
+    }
     renderEmpty(error.message, "error");
     setStatus("Could not load latest updates.");
     updatedText.textContent = "";
+    newsRequestController = null;
   }
 }
 

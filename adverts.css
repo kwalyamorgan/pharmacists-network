@@ -306,6 +306,8 @@ body.admin-enabled .adverts-admin-actions {
   background: rgba(255, 255, 255, 0.92);
   box-shadow: var(--shadow);
   display: grid;
+  content-visibility: auto;
+  contain-intrinsic-size: 360px;
 }
 
 .adverts-media {
@@ -890,6 +892,38 @@ textarea:focus {
 }
 
 @media (max-width: 720px) {
+  .adverts-item,
+  .adverts-featured,
+  .adverts-card,
+  .adverts-dialog-panel,
+  .adverts-featured-popup-body {
+    box-shadow: none;
+  }
+
+  .adverts-featured,
+  .adverts-card,
+  .adverts-dialog-panel,
+  .adverts-featured-popup-body,
+  .adverts-media-overlay,
+  .adverts-featured-body {
+    backdrop-filter: none;
+  }
+
+  .adverts-media::before,
+  .adverts-media::after,
+  .adverts-featured-media::before,
+  .adverts-featured-media::after {
+    display: none;
+  }
+
+  .adverts-featured-frame,
+  .adverts-media-overlay,
+  .adverts-featured-popup-body,
+  .adverts-media img,
+  .adverts-featured-media img {
+    transition: none;
+  }
+
   .adverts-card {
     padding: 14px;
   }

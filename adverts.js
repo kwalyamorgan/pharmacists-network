@@ -58,6 +58,10 @@ let featuredSlideIndex = 0;
 let featuredTimer = null;
 let featuredIsTransitioning = false;
 let featuredPopupAutoOpened = false;
+const isCompactViewport = window.matchMedia("(max-width: 720px)").matches;
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const saveDataEnabled = Boolean(navigator.connection && navigator.connection.saveData);
+const shouldFastLoadUi = isCompactViewport || prefersReducedMotion || saveDataEnabled;
 const API_BASE = (() => {
   const injected = String(window.__API_BASE__ || document.documentElement?.dataset?.apiBase || "").trim();
   if (injected) {
@@ -211,6 +215,9 @@ function closeFeaturedViewer() {
 }
 
 function maybeAutoOpenFeaturedViewer() {
+  if (shouldFastLoadUi) {
+    return;
+  }
   if (featuredPopupAutoOpened) {
     return;
   }
@@ -277,31 +284,34 @@ function renderFeaturedSlide() {
     if (record?.type === "video") {
       const video = document.createElement("video");
       video.controls = true;
-      video.autoplay = true;
+      video.autoplay = !shouldFastLoadUi;
       video.muted = true;
-      video.loop = true;
+      video.loop = !shouldFastLoadUi;
       video.src = record.url;
-      video.preload = "metadata";
+      video.preload = shouldFastLoadUi ? "none" : "metadata";
       video.playsInline = true;
       featuredPopupMedia.appendChild(video);
 
-      // Best-effort: some browsers require an explicit play() even with autoplay.
-      video.addEventListener(
-        "loadedmetadata",
-        () => {
-          try {
-            video.play()?.catch(() => {});
-          } catch {
-            // Ignore.
-          }
-        },
-        { once: true }
-      );
+      if (!shouldFastLoadUi) {
+        // Best-effort: some browsers require an explicit play() even with autoplay.
+        video.addEventListener(
+          "loadedmetadata",
+          () => {
+            try {
+              video.play()?.catch(() => {});
+            } catch {
+              // Ignore.
+            }
+          },
+          { once: true }
+        );
+      }
     } else if (record?.type === "image") {
       const img = document.createElement("img");
       img.src = record.url;
       img.alt = "Featured advert";
       img.loading = "lazy";
+      img.decoding = "async";
       img.addEventListener("click", () => openMediaViewerImage(record.url));
       featuredPopupMedia.appendChild(img);
     } else {
@@ -400,7 +410,7 @@ function setFeaturedSlidesFromItems(items) {
   maybeAutoOpenFeaturedViewer();
   stopFeaturedTimer();
 
-  if (featuredSlides.length > 1) {
+  if (featuredSlides.length > 1 && !shouldFastLoadUi) {
     featuredTimer = setInterval(() => {
       const nextIndex = (featuredSlideIndex + 1) % featuredSlides.length;
       transitionFeaturedToIndex(nextIndex);
@@ -550,6 +560,7 @@ function renderCreatedPreview(ad) {
       img.src = src;
       img.alt = "Advert image";
       img.loading = "lazy";
+      img.decoding = "async";
       createdPreviewMedia.appendChild(img);
     } else {
       const empty = document.createElement("p");
@@ -624,7 +635,11 @@ async function loadFeed() {
   try {
     setFeedStatus("Loading adverts…");
     const canUseAdmin = adminEnabled;
-    const url = canUseAdmin ? apiUrl("/api/adverts/admin/ads?limit=60") : apiUrl("/api/adverts/feed?limit=30");
+    const feedLimit = isCompactViewport ? 18 : 30;
+    const adminLimit = isCompactViewport ? 40 : 60;
+    const url = canUseAdmin
+      ? apiUrl(`/api/adverts/admin/ads?limit=${adminLimit}`)
+      : apiUrl(`/api/adverts/feed?limit=${feedLimit}`);
     const res = await fetch(url, {
       headers: {
         ...(canUseAdmin ? getAdminHeaders() : {})
@@ -676,13 +691,15 @@ function renderFeed(items) {
       const video = document.createElement("video");
       video.controls = true;
       video.src = record.url;
-      video.preload = "metadata";
+      video.preload = shouldFastLoadUi ? "none" : "metadata";
       mediaWrap.appendChild(video);
     } else if (record?.type === "image") {
       const img = document.createElement("img");
       img.src = record.url;
       img.alt = "Advert";
       img.loading = "lazy";
+      img.decoding = "async";
+      img.fetchPriority = "low";
       img.addEventListener("click", () => {
         openMediaViewerImage(record.url);
       });
