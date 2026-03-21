@@ -1088,6 +1088,17 @@ textarea:focus {
     padding-top: 6px;
   }
 
+  /* Ensure Paystack inline checkout appears above dialogs and overlays. */
+  /* Targets common Paystack classes and any iframe that loads Paystack. */
+  iframe[src*="paystack"],
+  .paystack-overlay,
+  .paystack-inline,
+  #paystack_inline_iframe,
+  .paystack-modal {
+    z-index: 2147483000 !important;
+    pointer-events: auto !important;
+  }
+
   .adverts-featured-popup-frame .adverts-featured-media img,
   .adverts-featured-popup-frame .adverts-featured-media video {
     object-fit: contain;
