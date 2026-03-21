@@ -1011,6 +1011,18 @@ textarea:focus {
     padding: 14px;
   }
 
+  /* Reduce featured section width on mobile and allow vertical layout */
+  .adverts-featured {
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .adverts-featured-frame {
+    width: 100%;
+    display: block;
+  }
+
   .adverts-row {
     grid-template-columns: 1fr;
   }
@@ -1058,6 +1070,29 @@ textarea:focus {
   .adverts-check {
     width: 100%;
     justify-content: space-between;
+  }
+
+  /* Make featured dialog panel stack and allow body scrolling to reveal link/date */
+  .adverts-featured-dialog-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .adverts-featured-popup-frame {
+    flex: 0 0 auto;
+  }
+
+  .adverts-featured-popup-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    max-height: calc(100dvh - 48vh);
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+    padding: 12px;
+    margin-top: 0;
   }
 
   .adverts-feed {

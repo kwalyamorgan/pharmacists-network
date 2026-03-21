@@ -220,9 +220,7 @@ function closeFeaturedViewer() {
 }
 
 function maybeAutoOpenFeaturedViewer() {
-  if (shouldFastLoadUi) {
-    return;
-  }
+  // Auto-open featured viewer on page load for both mobile and desktop
   if (featuredPopupAutoOpened) {
     return;
   }
@@ -423,7 +421,9 @@ function goToPreviousFeatured() {
 }
 
 function setupFeaturedSwipe() {
-  const swipeHost = featuredPopupFrame || featuredPopupMedia;
+  // Choose a sensible swipe host: prefer the dialog panel so we can detect scroll position.
+  const panel = (featuredViewerDialog && featuredViewerDialog.querySelector && featuredViewerDialog.querySelector('.adverts-featured-dialog-panel')) || null;
+  const swipeHost = panel || featuredPopupFrame || featuredPopupMedia;
   if (!swipeHost) {
     return;
   }
@@ -432,9 +432,7 @@ function setupFeaturedSwipe() {
     "touchstart",
     (event) => {
       const point = event.touches?.[0];
-      if (!point) {
-        return;
-      }
+      if (!point) return;
       featuredTouchStartX = point.clientX;
       featuredTouchStartY = point.clientY;
       featuredTouchDeltaX = 0;
@@ -446,14 +444,11 @@ function setupFeaturedSwipe() {
   swipeHost.addEventListener(
     "touchmove",
     (event) => {
-      if (!featuredTouchActive) {
-        return;
-      }
+      if (!featuredTouchActive) return;
       const point = event.touches?.[0];
-      if (!point) {
-        return;
-      }
+      if (!point) return;
       featuredTouchDeltaX = point.clientX - featuredTouchStartX;
+      featuredTouchDeltaY = point.clientY - featuredTouchStartY;
     },
     { passive: true }
   );
@@ -461,21 +456,38 @@ function setupFeaturedSwipe() {
   swipeHost.addEventListener(
     "touchend",
     (event) => {
-      if (!featuredTouchActive) {
-        return;
-      }
-
+      if (!featuredTouchActive) return;
       featuredTouchActive = false;
-
       const point = event.changedTouches?.[0];
-      if (!point) {
-        return;
-      }
-
+      if (!point) return;
       const deltaX = point.clientX - featuredTouchStartX;
       const deltaY = point.clientY - featuredTouchStartY;
 
-      // Trigger only deliberate horizontal swipes.
+      // On small viewports prefer vertical navigation: user scrolls down to read description/link/date,
+      // then an additional deliberate vertical swipe will navigate slides.
+      if (isCompactViewport) {
+        // If the panel is scrollable, only trigger navigation when at the scroll boundaries.
+        const scrollHost = panel || featuredPopupMedia || featuredPopupFrame || swipeHost;
+        const atTop = scrollHost.scrollTop <= 8;
+        const atBottom = scrollHost.scrollHeight - scrollHost.scrollTop - scrollHost.clientHeight <= 8;
+
+        // Upwards swipe (deltaY < 0) when at bottom -> next
+        if (deltaY < -40 && atBottom) {
+          goToNextFeatured();
+          return;
+        }
+
+        // Downwards swipe (deltaY > 40) when at top -> previous
+        if (deltaY > 40 && atTop) {
+          goToPreviousFeatured();
+          return;
+        }
+
+        // Otherwise allow native scroll.
+        return;
+      }
+
+      // Desktop: horizontal swipes navigate.
       if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) {
         return;
       }
