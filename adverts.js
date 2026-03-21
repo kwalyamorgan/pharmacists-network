@@ -151,7 +151,13 @@ function setDialogStatus(text) {
 }
 
 function setFeedStatus(text) {
-  feedStatus.textContent = text;
+  if (feedStatus) {
+    feedStatus.textContent = text;
+  } else {
+    try {
+      console.debug && console.debug("feedStatus missing: ", text);
+    } catch (e) {}
+  }
 }
 
 function money(amount) {
