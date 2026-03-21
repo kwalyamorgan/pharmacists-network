@@ -1262,7 +1262,16 @@ async function payForAdvert() {
   });
 
   try {
-    handler.openIframe();
+    // Delay opening the iframe slightly to allow dialog close/paint on mobile.
+    setTimeout(() => {
+      try {
+        handler.openIframe();
+      } catch (err) {
+        // Bubble up to outer catch by throwing inside timeout is async; handle here instead.
+        restoreDialogAfterCheckout();
+        setDialogStatus(err?.message || "Could not open Paystack checkout.");
+      }
+    }, 80);
   } catch (error) {
     restoreDialogAfterCheckout();
     throw new Error(error?.message || "Could not open Paystack checkout.");
