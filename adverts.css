@@ -828,6 +828,95 @@ textarea:focus {
 }
 
 @media (max-width: 720px) {
+  /* --- General mobile tweaks --- */
+  html {
+    font-size: 15px;
+  }
+  body, .adverts-dialog-panel, .adverts-featured-dialog-panel {
+    font-size: 0.97rem;
+  }
+  .adverts-label, .adverts-title, .adverts-media-title {
+    font-size: 1rem;
+  }
+  .adverts-dialog-title-row h2, .adverts-title {
+    font-size: 1.12rem;
+  }
+  .adverts-dialog-panel, .adverts-featured-dialog-panel {
+    padding: 8px 4px;
+    gap: 8px;
+  }
+  .adverts-dialog-panel input, .adverts-dialog-panel textarea, .adverts-dialog-panel select {
+    font-size: 0.98rem;
+    padding: 8px 10px;
+  }
+  .adverts-buttons .btn {
+    font-size: 1rem;
+    min-height: 40px;
+    padding: 0.5em 0.7em;
+  }
+  /* --- Dialog scrolling --- */
+  .adverts-dialog-panel, .adverts-featured-dialog-panel {
+    max-height: 92dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* --- Ensure all dialog content fits --- */
+  .adverts-dialog-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: rgba(255,255,255,0.97);
+    padding-bottom: 4px;
+  }
+  /* --- Featured section mobile --- */
+  .adverts-featured-popup-frame {
+    width: 100vw;
+    max-width: 100vw;
+    margin: 0 -4vw;
+  }
+  .adverts-featured-popup-frame .adverts-featured-media {
+    max-height: 48dvh;
+    min-height: 180px;
+    border-radius: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+  .adverts-featured-media img, .adverts-featured-media video {
+    width: 100vw;
+    max-width: 100vw;
+    height: auto;
+    max-height: 48dvh;
+    object-fit: contain;
+    border-radius: 10px;
+    scroll-snap-align: center;
+  }
+  /* --- Description and link below image --- */
+  .adverts-featured-popup-body {
+    margin-top: 8px;
+    padding: 10px 4px 12px;
+    gap: 8px;
+    font-size: 0.97rem;
+    background: rgba(255,255,255,0.98);
+    box-shadow: none;
+    border-radius: 8px;
+    overflow-x: auto;
+    max-width: 100vw;
+  }
+  .adverts-featured-popup-body .adverts-link {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.98rem;
+    min-height: 38px;
+    padding: 0.4em 0.7em;
+  }
+  /* --- Minimal animation for mobile --- */
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
   .adverts-featured-dialog-panel {
     width: min(560px, 92vw);
     max-height: 88vh;
