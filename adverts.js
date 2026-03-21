@@ -722,6 +722,10 @@ function renderCreatedPreview(ad) {
   }
 
   createdPreview.hidden = false;
+  // Hide the form and show only the preview and pay button
+  if (adForm) adForm.style.display = "none";
+  if (createdPreview) createdPreview.style.display = "block";
+  if (payBtn) payBtn.style.display = "inline-block";
 }
 
 function resetDialogState() {
@@ -731,7 +735,10 @@ function resetDialogState() {
   paymentSummary.textContent = "";
   setDialogStatus("");
 
-  if (createdPreview) createdPreview.hidden = true;
+  if (createdPreview) {
+    createdPreview.hidden = true;
+    createdPreview.style.display = "none";
+  }
   if (createdPreviewMedia) createdPreviewMedia.innerHTML = "";
   if (createdPreviewCopy) createdPreviewCopy.textContent = "";
   if (createdPreviewLink) {
@@ -739,7 +746,8 @@ function resetDialogState() {
     createdPreviewLink.removeAttribute("href");
     createdPreviewLink.textContent = "";
   }
-
+  if (adForm) adForm.style.display = "block";
+  if (payBtn) payBtn.style.display = "none";
   setFormEnabled(true);
 }
 
@@ -1187,7 +1195,10 @@ async function createAdvert() {
 
   currentAdId = data.ad.id;
   renderCreatedPreview(data.ad);
-  payBtn.hidden = false;
+  // Collapse all other UI, show only preview and pay
+  if (adForm) adForm.style.display = "none";
+  if (createdPreview) createdPreview.style.display = "block";
+  if (payBtn) payBtn.style.display = "inline-block";
   setDialogStatus("Advert created. Please pay to activate.");
   if (createBtn) createBtn.disabled = true;
   setFormEnabled(false);
@@ -1201,8 +1212,6 @@ async function createAdvert() {
     setDialogStatus("Advert created. Enter your email to pay and activate.");
     return;
   }
-
-  setTimeout(() => payBtn?.focus(), 0);
 
   // Let the preview/status paint before Paystack opens.
   setTimeout(() => {
@@ -1225,116 +1234,110 @@ async function verifyPayment(reference) {
 }
 
 async function payForAdvert() {
-  if (!currentAdId) {
-    return;
-  }
-
-  if (!paystackPublicKey) {
-    throw new Error("Paystack is not configured on the server.");
-  }
-
-  const email = String(emailInput?.value || "").trim();
-  if (!email) {
-    throw new Error("Please enter an email for payment.");
-  }
-
-  if (typeof PaystackPop === "undefined") {
-    throw new Error("Paystack checkout failed to load.");
-  }
-
-  setDialogStatus("Opening Paystack checkout…");
-
-  const restoreDialogAfterCheckout = (() => {
-    const wasOpen = Boolean(adDialog?.open);
-    if (wasOpen) {
-      try {
-        adDialog.close();
-      } catch {
-        // Ignore.
-      }
-    }
-
-    return () => {
-      if (!wasOpen || !adDialog) return;
-      try {
-        if (!adDialog.open) {
-          adDialog.showModal();
-        }
-      } catch {
-        // Ignore.
-      }
-    };
-  })();
-
-  const res = await fetch(apiUrl(`/api/adverts/ads/${currentAdId}/pay`), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      plan: planSelect.value,
-      featured: featuredCheckbox.checked,
-      email
-    })
-  });
-
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data?.error || "Could not start payment.");
-  }
-
-  if (data.totals) {
-    const extra = data.totals.extraFeaturedAmount ? ` + Featured ${money(data.totals.extraFeaturedAmount)}` : "";
-    paymentSummary.textContent = `Total: ${money(data.totals.totalAmount)}${extra}.`;
-  }
-
-  const reference = String(data.reference || "").trim();
-  const amount = Number(data.amount);
-  const currency = String(data.currency || "KES").trim() || "KES";
-
-  if (!reference || !Number.isFinite(amount) || amount <= 0) {
-    throw new Error("Could not start Paystack payment.");
-  }
-
-  const handler = PaystackPop.setup({
-    key: paystackPublicKey,
-    email,
-    amount,
-    currency,
-    ref: reference,
-    callback: function (response) {
-      restoreDialogAfterCheckout();
-      setDialogStatus("Verifying payment…");
-      const ref = String(response?.reference || reference).trim();
-      verifyPayment(ref)
-        .then(async () => {
-          setDialogStatus("Payment verified. Advert activated.");
-          payBtn.hidden = true;
-          await loadFeed();
-          closeDialog();
-        })
-        .catch((error) => {
-          setDialogStatus(error?.message || "Payment verification failed.");
-        });
-    },
-    onClose: function () {
-      restoreDialogAfterCheckout();
-      setDialogStatus("Payment cancelled.");
-    }
-  });
-
   try {
-    // Delay opening the iframe slightly to allow dialog close/paint on mobile.
-    setTimeout(() => {
-      try {
-        handler.openIframe();
-      } catch (err) {
-        // Bubble up to outer catch by throwing inside timeout is async; handle here instead.
-        restoreDialogAfterCheckout();
-        setDialogStatus(err?.message || "Could not open Paystack checkout.");
+    if (!currentAdId) {
+      console.error("[Paystack] No currentAdId");
+      return;
+    }
+    if (!paystackPublicKey) {
+      console.error("[Paystack] paystackPublicKey missing", paystackPublicKey);
+      throw new Error("Paystack is not configured on the server.");
+    }
+    const email = String(emailInput?.value || "").trim();
+    if (!email) {
+      console.error("[Paystack] Email missing");
+      throw new Error("Please enter an email for payment.");
+    }
+    if (typeof PaystackPop === "undefined") {
+      console.error("[Paystack] PaystackPop is undefined");
+      throw new Error("Paystack checkout failed to load.");
+    }
+    setDialogStatus("Opening Paystack checkout…");
+    // Hide everything except preview and Paystack
+    if (adForm) adForm.style.display = "none";
+    if (createdPreview) createdPreview.style.display = "block";
+    if (payBtn) payBtn.style.display = "inline-block";
+    console.log("[Paystack] paystackPublicKey:", paystackPublicKey);
+    const restoreDialogAfterCheckout = (() => {
+      const wasOpen = Boolean(adDialog?.open);
+      if (wasOpen) {
+        try { adDialog.close(); } catch {}
       }
-    }, 80);
-  } catch (error) {
-    restoreDialogAfterCheckout();
-    throw new Error(error?.message || "Could not open Paystack checkout.");
+      return () => {
+        if (!wasOpen || !adDialog) return;
+        try { if (!adDialog.open) { adDialog.showModal(); } } catch {}
+      };
+    })();
+    const res = await fetch(apiUrl(`/api/adverts/ads/${currentAdId}/pay`), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        plan: planSelect.value,
+        featured: featuredCheckbox.checked,
+        email
+      })
+    });
+    const data = await res.json();
+    console.log("[Paystack] /pay endpoint response:", data);
+    if (!res.ok) {
+      console.error("[Paystack] /pay endpoint error:", data);
+      throw new Error(data?.error || "Could not start payment.");
+    }
+    if (data.totals) {
+      const extra = data.totals.extraFeaturedAmount ? ` + Featured ${money(data.totals.extraFeaturedAmount)}` : "";
+      paymentSummary.textContent = `Total: ${money(data.totals.totalAmount)}${extra}.`;
+    }
+    const reference = String(data.reference || "").trim();
+    const amount = Number(data.amount);
+    const currency = String(data.currency || "KES").trim() || "KES";
+    if (!reference || !Number.isFinite(amount) || amount <= 0) {
+      console.error("[Paystack] Invalid reference/amount", { reference, amount, currency });
+      throw new Error("Could not start Paystack payment.");
+    }
+    const handler = PaystackPop.setup({
+      key: paystackPublicKey,
+      email,
+      amount,
+      currency,
+      ref: reference,
+      callback: function (response) {
+        restoreDialogAfterCheckout();
+        setDialogStatus("Verifying payment…");
+        const ref = String(response?.reference || reference).trim();
+        verifyPayment(ref)
+          .then(async () => {
+            setDialogStatus("Payment verified. Advert activated.");
+            payBtn.hidden = true;
+            await loadFeed();
+            closeDialog();
+          })
+          .catch((error) => {
+            setDialogStatus(error?.message || "Payment verification failed.");
+          });
+      },
+      onClose: function () {
+        restoreDialogAfterCheckout();
+        setDialogStatus("Payment cancelled.");
+      }
+    });
+    try {
+      setTimeout(() => {
+        try {
+          handler.openIframe();
+        } catch (err) {
+          console.error("[Paystack] openIframe error", err);
+          restoreDialogAfterCheckout();
+          setDialogStatus(err?.message || "Could not open Paystack checkout.");
+        }
+      }, 80);
+    } catch (error) {
+      console.error("[Paystack] outer openIframe error", error);
+      restoreDialogAfterCheckout();
+      throw new Error(error?.message || "Could not open Paystack checkout.");
+    }
+  } catch (err) {
+    console.error("[Paystack] payForAdvert error", err);
+    throw err;
   }
 }
 
