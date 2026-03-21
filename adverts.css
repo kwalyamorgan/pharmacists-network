@@ -788,6 +788,30 @@ textarea:focus {
   transition: opacity 180ms ease, transform 180ms ease, max-height 220ms ease, padding 180ms ease;
 }
 
+/* Mobile next arrow inside featured dialog */
+.featured-next-mobile {
+  display: none;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 18px;
+}
+
+@media (max-width: 720px) {
+  .adverts-featured-popup-body {
+    position: relative;
+  }
+  .featured-next-mobile {
+    display: block;
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 60;
+  }
+}
+
 .adverts-featured-dialog-panel:hover .adverts-featured-popup-body,
 .adverts-featured-dialog-panel:focus-within .adverts-featured-popup-body {
   opacity: 1;

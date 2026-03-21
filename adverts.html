@@ -33,7 +33,7 @@
       <div class="adverts-actions">
         <a class="btn btn-filter" href="/">Back to news</a>
         <button id="featuredViewerBtn" class="btn btn-filter" type="button">Featured</button>
-        <button id="advertiseBtn" class="btn btn-filter" type="button">Advertise</button>
+        <a id="advertiseLink" class="btn btn-filter" href="advertise.html">Advertise</a>
       </div>
     </header>
 
@@ -99,6 +99,7 @@
             <h2 class="adverts-title adverts-media-title">Featured</h2>
             <p id="featuredPopupCount" class="adverts-hint"></p>
           </div>
+          <button id="featuredNextBtn" class="btn btn-ghost" type="button">Next</button>
           <button id="closeFeaturedViewerBtn" class="menu-close" type="button">Close</button>
         </div>
 
@@ -111,6 +112,7 @@
           <p id="featuredPopupCopy" class="adverts-copy"></p>
           <a id="featuredPopupLink" class="adverts-link" hidden rel="noopener noreferrer" target="_blank"></a>
           <p id="featuredPopupMeta" class="adverts-meta"></p>
+          <button id="featuredNextMobileBtn" class="featured-next-mobile" type="button" aria-label="Next">↓</button>
         </section>
       </div>
     </dialog>

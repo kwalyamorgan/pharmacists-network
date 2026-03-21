@@ -16,6 +16,8 @@ const featuredPopupBadge = document.getElementById("featuredPopupBadge");
 const featuredPopupCopy = document.getElementById("featuredPopupCopy");
 const featuredPopupLink = document.getElementById("featuredPopupLink");
 const featuredPopupMeta = document.getElementById("featuredPopupMeta");
+const featuredNextBtn = document.getElementById("featuredNextBtn");
+const featuredNextMobileBtn = document.getElementById("featuredNextMobileBtn");
 
 // (on-page featured panel removed; featured ads show only in dialog)
 
@@ -1119,6 +1121,9 @@ async function createAdvert() {
   if (mediaType === "video" && !file) {
     throw new Error("Please upload a video file for a video advert.");
   }
+  if (mediaType === "image" && !file) {
+    throw new Error("Please upload an image file for an image advert.");
+  }
   if (file && mediaType === "image" && !String(file.type).startsWith("image/")) {
     throw new Error("Please upload an image file.");
   }
@@ -1371,6 +1376,16 @@ featuredViewerDialog?.addEventListener("click", (event) => {
   if (!clickedInDialog) {
     closeFeaturedViewer();
   }
+});
+
+featuredNextBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  goToNextFeatured();
+});
+
+featuredNextMobileBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  goToNextFeatured();
 });
 
 adForm.addEventListener("submit", async (event) => {

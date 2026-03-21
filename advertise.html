@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advertise</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="adverts.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="site-brand" aria-label="Site brand">
+        <img class="site-brand-logo" src="logo/logo.png" alt="Kenyan Pharmacists Professional Network logo" width="48" height="48" />
+      </div>
+      <p class="hero-kicker">Kenyan Pharmacists Professional Network</p>
+      <h1>Advertise</h1>
+      <p class="hero-text">Post an advert and pay via Paystack to activate it.</p>
+      <div class="adverts-actions">
+        <a class="btn btn-filter" href="adverts.html">Back to adverts</a>
+      </div>
+    </header>
+
+    <main class="container">
+      <form id="adForm" class="adverts-card adverts-dialog-panel" method="post">
+        <h2 class="adverts-title">Create advert</h2>
+
+        <label class="adverts-label" for="phoneInput">Phone number</label>
+        <input id="phoneInput" name="phone" type="tel" placeholder="e.g. 2547XXXXXXXX" required />
+
+        <label class="adverts-label" for="emailInput">Email (for payment)</label>
+        <input id="emailInput" name="email" type="email" placeholder="e.g. name@example.com" />
+
+        <label class="adverts-label" for="contentInput">Ad content</label>
+        <textarea id="contentInput" name="content" rows="5" placeholder="Write your advert..." required></textarea>
+
+        <label class="adverts-label" for="linkInput">Link (optional)</label>
+        <input id="linkInput" name="linkUrl" type="text" inputmode="url" placeholder="https://example.com" />
+
+        <div class="adverts-row">
+          <div class="adverts-field">
+            <label class="adverts-label" for="mediaTypeSelect">Advert type</label>
+            <select id="mediaTypeSelect" name="mediaType">
+              <option value="image">Image</option>
+              <option value="video">Video</option>
+            </select>
+            <p id="mediaHint" class="adverts-hint"></p>
+          </div>
+
+          <div class="adverts-field">
+            <label class="adverts-label" for="planSelect">Plan</label>
+            <select id="planSelect" name="plan">
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+            <p id="planHint" class="adverts-hint"></p>
+          </div>
+        </div>
+
+        <label class="adverts-label" for="mediaInput">Upload media (required)</label>
+        <input id="mediaInput" name="media" type="file" accept="image/*,video/*" required />
+
+        <label class="adverts-check">
+          <input id="featuredCheckbox" type="checkbox" />
+          <span>Feature (+KES 300)</span>
+        </label>
+
+        <div class="adverts-buttons">
+          <button id="createBtn" class="btn" type="submit">Create advert</button>
+          <button id="payBtn" class="btn" type="button" hidden>Pay with Paystack</button>
+        </div>
+
+        <div id="adStatus" class="adverts-status" role="status" aria-live="polite"></div>
+      </form>
+    </main>
+
+    <script src="https://js.paystack.co/v1/inline.js" defer></script>
+    <script src="adverts.js" defer></script>
+  </body>
+</html>
