@@ -147,17 +147,33 @@ async function validateAdminTokenOrThrow() {
 }
 
 function setDialogStatus(text) {
-  adStatus.textContent = text;
+  if (adStatus) {
+    try {
+      adStatus.textContent = text;
+    } catch (e) {
+      try {
+        console.debug && console.debug("adStatus set failed:", e, text);
+      } catch (__) {}
+    }
+  } else {
+    try {
+      console.debug && console.debug("adStatus missing:", text);
+    } catch (__) {}
+  }
 }
 
 function setFeedStatus(text) {
-  if (feedStatus) {
-    feedStatus.textContent = text;
-  } else {
-    try {
-      console.debug && console.debug("feedStatus missing: ", text);
-    } catch (e) {}
+  try {
+    if (feedStatus && typeof feedStatus.textContent !== "undefined") {
+      feedStatus.textContent = text;
+      return;
+    }
+  } catch (e) {
+    // ignore
   }
+  try {
+    console.debug && console.debug("feedStatus missing or not writable:", text);
+  } catch (e) {}
 }
 
 function money(amount) {
