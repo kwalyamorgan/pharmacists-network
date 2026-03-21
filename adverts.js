@@ -17,6 +17,15 @@ const featuredPopupCopy = document.getElementById("featuredPopupCopy");
 const featuredPopupLink = document.getElementById("featuredPopupLink");
 const featuredPopupMeta = document.getElementById("featuredPopupMeta");
 
+// Desktop panel elements (visible on-page slideshow)
+const featuredPanel = document.getElementById("featuredPanel");
+const featuredPanelFrame = document.getElementById("featuredPanelFrame");
+const featuredPanelMedia = document.getElementById("featuredPanelMedia");
+const featuredPanelBadge = document.getElementById("featuredPanelBadge");
+const featuredPanelCopy = document.getElementById("featuredPanelCopy");
+const featuredPanelLink = document.getElementById("featuredPanelLink");
+const featuredPanelMeta = document.getElementById("featuredPanelMeta");
+
 const adForm = document.getElementById("adForm");
 const phoneInput = document.getElementById("phoneInput");
 const emailInput = document.getElementById("emailInput");
@@ -219,6 +228,18 @@ function startFeaturedTimer() {
     const nextIndex = (featuredSlideIndex + 1) % featuredSlides.length;
     transitionFeaturedToIndex(nextIndex);
   }, 6500);
+  // If there is a visible on-page panel, pause on hover and resume on leave.
+  if (featuredPanelFrame && !isCompactViewport) {
+    try {
+      if (!featuredPanelFrame._hasFeaturedHover) {
+        featuredPanelFrame.addEventListener("mouseenter", stopFeaturedTimer, { passive: true });
+        featuredPanelFrame.addEventListener("mouseleave", startFeaturedTimer, { passive: true });
+        featuredPanelFrame._hasFeaturedHover = true;
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
 }
 
 function getFeaturedTransitionFrame() {
@@ -380,6 +401,82 @@ function renderFeaturedSlide() {
   if (featuredPopupMeta) {
     const until = item.activeUntil ? new Date(item.activeUntil).toLocaleString() : "";
     featuredPopupMeta.textContent = until ? `Active until: ${until}` : "";
+  }
+
+  // Also update the on-page featured panel (desktop slideshow)
+  if (featuredPanel) {
+    featuredPanel.hidden = false;
+  }
+
+  if (featuredPanelMedia) {
+    featuredPanelMedia.innerHTML = "";
+    const record = Array.isArray(item.media) && item.media.length ? item.media[0] : null;
+
+    if (record?.type === "video") {
+      const video = document.createElement("video");
+      video.controls = true;
+      video.autoplay = !shouldFastLoadUi;
+      video.muted = true;
+      video.loop = !shouldFastLoadUi;
+      video.src = record.url;
+      video.preload = shouldFastLoadUi ? "none" : "metadata";
+      video.playsInline = true;
+      featuredPanelMedia.appendChild(video);
+      video.addEventListener(
+        "loadedmetadata",
+        () => {
+          try {
+            video.play()?.catch(() => {});
+          } catch {}
+        },
+        { once: true }
+      );
+    } else if (record?.type === "image") {
+      const img = document.createElement("img");
+      img.src = record.url;
+      img.alt = "Featured advert";
+      img.loading = "lazy";
+      img.decoding = "async";
+      img.addEventListener("click", () => openMediaViewerImage(record.url));
+      featuredPanelMedia.appendChild(img);
+    }
+  }
+
+  if (featuredPanelBadge) {
+    const badgeBits = [];
+    if (item.isVerified) badgeBits.push("Verified");
+    if (adminEnabled && item.status) badgeBits.push(String(item.status));
+    featuredPanelBadge.textContent = badgeBits.join(" • ");
+    featuredPanelBadge.hidden = badgeBits.length === 0;
+  }
+
+  if (featuredPanelCopy) {
+    featuredPanelCopy.textContent = String(item.content || "");
+    bindClickableDescription(featuredPanelCopy, item.linkUrl);
+  }
+
+  if (featuredPanelLink) {
+    const url = String(item.linkUrl || "").trim();
+    if (url) {
+      featuredPanelLink.hidden = false;
+      featuredPanelLink.href = url;
+      featuredPanelLink.textContent = "Visit link";
+      featuredPanelLink.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openExternalAdvertLink(url);
+      };
+    } else {
+      featuredPanelLink.hidden = true;
+      featuredPanelLink.removeAttribute("href");
+      featuredPanelLink.textContent = "";
+      featuredPanelLink.onclick = null;
+    }
+  }
+
+  if (featuredPanelMeta) {
+    const until = item.activeUntil ? new Date(item.activeUntil).toLocaleString() : "";
+    featuredPanelMeta.textContent = until ? `Active until: ${until}` : "";
   }
 }
 

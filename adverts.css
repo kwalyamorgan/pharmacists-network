@@ -828,6 +828,11 @@ textarea:focus {
 }
 
 @media (max-width: 720px) {
+  /* Prevent accidental horizontal scrolling on narrow screens */
+  html,
+  body {
+    overflow-x: hidden;
+  }
   .adverts-featured-dialog-panel {
     width: min(560px, 92vw);
     max-height: 88vh;
@@ -1078,6 +1083,11 @@ textarea:focus {
     flex-direction: column;
     padding: 10px;
     gap: 8px;
+    /* tighten width to account for scrollbars and safe areas */
+    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
+    margin: 0 8px;
+    border-radius: 12px;
   }
 
   .adverts-featured-popup-frame {
@@ -1091,8 +1101,33 @@ textarea:focus {
     opacity: 1;
     pointer-events: auto;
     transform: none;
-    padding: 12px;
+    padding: 10px;
     margin-top: 0;
+    box-sizing: border-box;
+  }
+
+  /* Ensure description, link and meta stack and fit narrow widths */
+  .adverts-featured-popup-body .adverts-copy {
+    font-size: 0.92rem;
+    line-height: 1.4;
+    -webkit-line-clamp: 4;
+  }
+
+  .adverts-featured-popup-body .adverts-link {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.56rem 0.75rem;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 0.92rem;
+  }
+
+  .adverts-featured-popup-body .adverts-meta {
+    display: block;
+    width: 100%;
+    font-size: 0.82rem;
+    color: var(--muted);
   }
 
   .adverts-feed {
