@@ -907,66 +907,6 @@ textarea:focus {
   background: #000;
 }
 
-/* Advertise page specific layout and responsive tweaks */
-.advertise-page .container {
-  display: block;
-  padding: 8px 16px 32px;
-}
-
-.advertise-page .adverts-card {
-  width: min(1100px, 96vw);
-  margin: 12px auto;
-  padding: 18px;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  align-items: start;
-}
-
-.advertise-page .adverts-dialog-panel {
-  max-height: none;
-}
-
-.advertise-page .adverts-buttons {
-  justify-content: flex-start;
-  gap: 10px;
-}
-
-.advertise-page input[type="file"] {
-  width: 100%;
-}
-
-.advertise-page .adverts-created-preview {
-  width: 100%;
-}
-
-@media (min-width: 860px) {
-  .advertise-page .adverts-card {
-    grid-template-columns: 1fr 420px;
-    gap: 22px;
-  }
-
-  .advertise-page .adverts-created-preview {
-    position: sticky;
-    top: 84px;
-    align-self: start;
-    max-height: calc(100vh - 100px);
-    overflow: auto;
-  }
-
-  .advertise-page .adverts-buttons {
-    justify-content: flex-end;
-  }
-}
-
-/* Slightly larger tap targets on mobile */
-@media (max-width: 480px) {
-  .advertise-page .adverts-buttons .btn {
-    padding: 12px 16px;
-    font-size: 1rem;
-  }
-}
-
 .adverts-dialog-head {
   display: flex;
   align-items: center;
@@ -1146,17 +1086,6 @@ textarea:focus {
     z-index: 4;
     background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.96));
     padding-top: 6px;
-  }
-
-  /* Ensure Paystack inline checkout appears above dialogs and overlays. */
-  /* Targets common Paystack classes and any iframe that loads Paystack. */
-  iframe[src*="paystack"],
-  .paystack-overlay,
-  .paystack-inline,
-  #paystack_inline_iframe,
-  .paystack-modal {
-    z-index: 2147483000 !important;
-    pointer-events: auto !important;
   }
 
   .adverts-featured-popup-frame .adverts-featured-media img,
