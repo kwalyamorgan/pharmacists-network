@@ -285,8 +285,23 @@ async function loadCategories() {
     }
 
     const data = await response.json();
-    const uniqueCategories = [...new Set(data.sources.map((source) => source.category))].sort();
-    const uniqueSources = [...new Set(data.sources.map((source) => source.name))].sort();
+    const uniqueCategories = (() => {
+      const map = new Map();
+      for (const s of data.sources || []) {
+        const key = String(s.category || "").trim().toLowerCase();
+        if (key && !map.has(key)) map.set(key, String(s.category).trim());
+      }
+      return [...map.values()].sort();
+    })();
+
+    const uniqueSources = (() => {
+      const map = new Map();
+      for (const s of data.sources || []) {
+        const key = String(s.name || "").trim().toLowerCase();
+        if (key && !map.has(key)) map.set(key, String(s.name).trim());
+      }
+      return [...map.values()].sort();
+    })();
 
     uniqueCategories.forEach((category) => {
       const option = document.createElement("option");
