@@ -209,6 +209,18 @@ function stopFeaturedTimer() {
   }
 }
 
+function startFeaturedTimer() {
+  // Start autoplay timer for featured slides on non-compact viewports.
+  if (featuredTimer) return;
+  if (featuredSlides.length <= 1) return;
+  if (shouldFastLoadUi) return;
+
+  featuredTimer = setInterval(() => {
+    const nextIndex = (featuredSlideIndex + 1) % featuredSlides.length;
+    transitionFeaturedToIndex(nextIndex);
+  }, 6500);
+}
+
 function getFeaturedTransitionFrame() {
   return featuredPopupFrame || null;
 }
@@ -217,6 +229,7 @@ function closeFeaturedViewer() {
   if (featuredViewerDialog?.open) {
     featuredViewerDialog.close();
   }
+  stopFeaturedTimer();
 }
 
 function maybeAutoOpenFeaturedViewer() {
@@ -234,9 +247,11 @@ function maybeAutoOpenFeaturedViewer() {
   featuredPopupAutoOpened = true;
   try {
     featuredViewerDialog.showModal();
+    startFeaturedTimer();
   } catch {
     try {
       featuredViewerDialog.show();
+      startFeaturedTimer();
     } catch {
       // Ignore (browser may block non-user initiated dialogs).
     }
@@ -515,13 +530,7 @@ function setFeaturedSlidesFromItems(items) {
   renderFeaturedSlide();
   maybeAutoOpenFeaturedViewer();
   stopFeaturedTimer();
-
-  if (featuredSlides.length > 1 && !shouldFastLoadUi) {
-    featuredTimer = setInterval(() => {
-      const nextIndex = (featuredSlideIndex + 1) % featuredSlides.length;
-      transitionFeaturedToIndex(nextIndex);
-    }, 6500);
-  }
+  startFeaturedTimer();
 }
 
 function safeMediaType() {
