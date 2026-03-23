@@ -378,15 +378,15 @@ body.admin-enabled .adverts-admin-actions {
   pointer-events: auto;
 }
 
-@media (hover: none) {
-  .adverts-media-overlay,
-  .adverts-featured-popup-body {
-    opacity: 1;
-    transform: translateY(0);
-    max-height: 260px;
-    padding: 12px;
-    pointer-events: auto;
-  }
+/* For touch devices we provide an explicit toggle class so taps
+   can open the overlay instead of forcing it always visible. */
+.adverts-item.touch-open .adverts-media-overlay,
+.adverts-featured-dialog-panel.touch-open .adverts-featured-popup-body {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 260px;
+  padding: 12px;
+  pointer-events: auto;
 }
 
 .adverts-media img,
