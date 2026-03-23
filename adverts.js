@@ -874,19 +874,21 @@ function renderFeed(items) {
     const badgeBits = [];
     if (item.isVerified) badgeBits.push("Verified");
     if (adminEnabled && item.status) badgeBits.push(String(item.status));
-    badge.textContent = badgeBits.length ? badgeBits.join(" • ") : "";
     if (badge) {
+      badge.textContent = badgeBits.length ? badgeBits.join(" • ") : "";
       badge.hidden = badge.textContent.trim().length === 0;
     }
 
     const copy = clone.querySelector("[data-copy]");
-    copy.textContent = item.content;
-    copy.classList.remove("adverts-copy--clickable");
-    copy.onclick = null;
-    copy.onkeydown = null;
-    copy.removeAttribute("role");
-    copy.removeAttribute("tabindex");
-    copy.removeAttribute("aria-label");
+    if (copy) {
+      copy.textContent = item.content;
+      copy.classList.remove("adverts-copy--clickable");
+      copy.onclick = null;
+      copy.onkeydown = null;
+      copy.removeAttribute("role");
+      copy.removeAttribute("tabindex");
+      copy.removeAttribute("aria-label");
+    }
 
     const linkEl = clone.querySelector("[data-link]");
     if (linkEl) {
@@ -910,7 +912,9 @@ function renderFeed(items) {
 
     const meta = clone.querySelector("[data-meta]");
     const until = item.activeUntil ? new Date(item.activeUntil).toLocaleString() : "";
-    meta.textContent = until ? `Active until: ${until}` : "";
+    if (meta) {
+      meta.textContent = until ? `Active until: ${until}` : "";
+    }
 
     const adminActions = clone.querySelector("[data-admin-actions]");
     if (adminActions) {
@@ -1413,7 +1417,7 @@ featuredNextMobileBtn?.addEventListener("click", (e) => {
   goToNextFeatured();
 });
 
-adForm.addEventListener("submit", async (event) => {
+adForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
     setDialogStatus("Creating advert…");
@@ -1423,7 +1427,7 @@ adForm.addEventListener("submit", async (event) => {
   }
 });
 
-payBtn.addEventListener("click", async () => {
+payBtn?.addEventListener("click", async () => {
   try {
     await payForAdvert();
   } catch (error) {
@@ -1431,9 +1435,9 @@ payBtn.addEventListener("click", async () => {
   }
 });
 
-planSelect.addEventListener("change", refreshHints);
-mediaTypeSelect.addEventListener("change", refreshHints);
-featuredCheckbox.addEventListener("change", refreshHints);
+planSelect?.addEventListener("change", refreshHints);
+mediaTypeSelect?.addEventListener("change", refreshHints);
+featuredCheckbox?.addEventListener("change", refreshHints);
 
 adminEnableBtn?.addEventListener("click", async () => {
   try {
