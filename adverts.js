@@ -114,6 +114,9 @@ function setAdminUiVisible(nextVisible) {
   adminUiVisible = Boolean(nextVisible);
   if (adminPanel) {
     adminPanel.hidden = !adminUiVisible;
+    try {
+      adminPanel.style.display = adminUiVisible ? "" : "none";
+    } catch (e) {}
   }
 
   document.body.classList.toggle("admin-ui-visible", adminUiVisible);
