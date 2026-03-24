@@ -87,10 +87,28 @@ const API_BASE = (() => {
     : "";
 })();
 
+const isTouchCapable = typeof window !== "undefined" && (("ontouchstart" in window) || (navigator.maxTouchPoints || 0) > 0);
+let _touchDocListenerAdded = false;
+
 function apiUrl(path) {
   const base = API_BASE.replace(/\/+$/, "");
   const normalizedPath = String(path || "");
   return `${base}${normalizedPath}`;
+}
+
+function resolveMediaUrl(url) {
+  const s = String(url || "").trim();
+  if (!s) return "";
+  // Absolute URLs (http/https) are returned as-is.
+  if (/^https?:\/\//i.test(s)) return s;
+  // Root-relative paths should be resolved against API_BASE when available,
+  // otherwise use the current origin so files load when the page is served
+  // from a different origin or opened via file:// during local testing.
+  if (s.startsWith("/")) {
+    const base = (API_BASE && API_BASE.replace(/\/+$/, "")) || window.location.origin || "";
+    return `${base}${s}`;
+  }
+  return s;
 }
 
 function getAdminHeaders() {
@@ -334,7 +352,7 @@ function renderFeaturedSlide() {
       video.autoplay = !shouldFastLoadUi;
       video.muted = true;
       video.loop = !shouldFastLoadUi;
-      video.src = record.url;
+      video.src = resolveMediaUrl(record.url);
       video.preload = shouldFastLoadUi ? "none" : "metadata";
       video.playsInline = true;
       featuredPopupMedia.appendChild(video);
@@ -355,11 +373,11 @@ function renderFeaturedSlide() {
       }
     } else if (record?.type === "image") {
       const img = document.createElement("img");
-      img.src = record.url;
+      img.src = resolveMediaUrl(record.url);
       img.alt = "Featured advert";
       img.loading = "lazy";
       img.decoding = "async";
-      img.addEventListener("click", () => openMediaViewerImage(record.url));
+      img.addEventListener("click", () => openMediaViewerImage(resolveMediaUrl(record.url)));
       featuredPopupMedia.appendChild(img);
     } else {
       const placeholder = document.createElement("p");
@@ -705,13 +723,13 @@ function renderCreatedPreview(ad) {
 
     if (src && mediaType === "video") {
       const el = document.createElement("video");
-      el.src = src;
+      el.src = resolveMediaUrl(src);
       el.controls = true;
       el.playsInline = true;
       createdPreviewMedia.appendChild(el);
     } else if (src) {
       const img = document.createElement("img");
-      img.src = src;
+      img.src = resolveMediaUrl(src);
       img.alt = "Advert image";
       img.loading = "lazy";
       img.decoding = "async";
@@ -852,18 +870,18 @@ function renderFeed(items) {
     if (record?.type === "video") {
       const video = document.createElement("video");
       video.controls = true;
-      video.src = record.url;
+      video.src = resolveMediaUrl(record.url);
       video.preload = shouldFastLoadUi ? "none" : "metadata";
       mediaWrap.appendChild(video);
     } else if (record?.type === "image") {
       const img = document.createElement("img");
-      img.src = record.url;
+      img.src = resolveMediaUrl(record.url);
       img.alt = "Advert";
       img.loading = "lazy";
       img.decoding = "async";
       img.fetchPriority = "low";
       img.addEventListener("click", () => {
-        openMediaViewerImage(record.url);
+        openMediaViewerImage(resolveMediaUrl(record.url));
       });
       mediaWrap.appendChild(img);
     } else {
@@ -871,6 +889,35 @@ function renderFeed(items) {
       placeholder.className = "adverts-hint";
       placeholder.textContent = "No media";
       mediaWrap.appendChild(placeholder);
+    }
+
+    // Touch devices: allow tap to toggle overlay instead of forcing it always visible.
+    if (isTouchCapable && mediaWrap && card) {
+      mediaWrap.addEventListener(
+        "click",
+        (e) => {
+          const tg = e.target;
+          if (!tg) return;
+          // Ignore clicks on interactive elements inside the media area.
+          if ((tg.closest && (tg.closest("a") || tg.closest("button"))) || tg.tagName === "VIDEO") return;
+          card.classList.toggle("touch-open");
+        },
+        { passive: true }
+      );
+
+      if (!_touchDocListenerAdded) {
+        // Ensure a single document listener removes open overlays when tapping elsewhere.
+        document.addEventListener(
+          "click",
+          (ev) => {
+            document.querySelectorAll(".adverts-item.touch-open").forEach((el) => {
+              if (!el.contains(ev.target)) el.classList.remove("touch-open");
+            });
+          },
+          { passive: true }
+        );
+        _touchDocListenerAdded = true;
+      }
     }
 
     const badge = clone.querySelector("[data-badge]");
@@ -923,6 +970,9 @@ function renderFeed(items) {
     if (adminActions) {
       const canUseAdmin = adminEnabled;
       adminActions.hidden = !canUseAdmin;
+      try {
+        adminActions.style.display = canUseAdmin ? "" : "none";
+      } catch (e) {}
       const activateBtn = clone.querySelector("[data-admin-activate]");
       const mediaBtn = clone.querySelector("[data-admin-media]");
       const editBtn = clone.querySelector("[data-admin-edit]");
