@@ -140,14 +140,14 @@ function setAdminUiVisible(nextVisible) {
   document.body.classList.toggle("admin-ui-visible", adminUiVisible);
 
   if (!adminUiVisible) {
-    setAdminEnabled(false);
-  }
-}
-
-function setAdminEnabled(nextEnabled) {
-  adminEnabled = Boolean(nextEnabled);
-  document.body.classList.toggle("admin-enabled", adminEnabled);
-}
+        const encodedId = encodeURIComponent(currentAdId);
+        const res = await fetch(apiUrl(`/api/adverts/ads/${encodedId}/pay`), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            plan: planSelect.value,
+            featured: featuredCheckbox.checked,
+            email
 
 async function validateAdminTokenOrThrow() {
   const token = String(adminToken || "").trim();
@@ -846,6 +846,10 @@ function renderFeed(items) {
   const ordered = featured.concat(normal);
 
   setFeaturedSlidesFromItems(ordered);
+  if (!adsFeed) {
+    console.debug && console.debug("adsFeed missing, cannot render feed");
+    return;
+  }
   adsFeed.innerHTML = "";
 
   if (!ordered.length) {
@@ -1242,16 +1246,25 @@ async function createAdvert() {
     throw new Error(data?.error || "Could not create advert.");
   }
 
-  if (!data.requiresPayment) {
+  // Server may return either { ad, requiresPayment } (legacy) or the ad object directly.
+  const serverAd = data?.ad || data || null;
+  const adStatus = String(serverAd?.status || "").toLowerCase();
+  const requiresPayment = typeof data?.requiresPayment === "boolean"
+    ? data.requiresPayment
+    : !(adStatus === "active");
+
+  if (!requiresPayment) {
     payBtn.hidden = true;
-    const until = data?.ad?.activeUntil ? new Date(data.ad.activeUntil).toLocaleString() : "";
+    const until = serverAd?.activeUntil ? new Date(serverAd.activeUntil).toLocaleString() : "";
     setDialogStatus(until ? `Ad is active until ${until}.` : "Ad is active.");
     await loadFeed();
     return;
   }
 
-  currentAdId = data.ad.id;
-  renderCreatedPreview(data.ad);
+  // Ensure we use the id field (Mongoose may expose _id); prefer `id`, fallback to `_id`.
+  const adIdValue = String(serverAd?.id || (serverAd?._id ? serverAd._id.toString() : "") || "");
+  currentAdId = adIdValue;
+  renderCreatedPreview(serverAd);
   // Collapse all other UI, show only preview and pay
   if (adForm) adForm.style.display = "none";
   if (createdPreview) createdPreview.style.display = "block";
@@ -1527,7 +1540,11 @@ document.addEventListener("keydown", async (event) => {
     setFeedStatus("Loading…");
     setupFeaturedSwipe();
     await loadOffers();
-    await loadFeed();
+    if (adsFeed) {
+      await loadFeed();
+    } else {
+      console.debug && console.debug('adsFeed element not present; skipping loadFeed()');
+    }
     try {
       await loadPaystackConfig();
     } catch (error) {
