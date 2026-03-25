@@ -140,14 +140,9 @@ function setAdminUiVisible(nextVisible) {
   document.body.classList.toggle("admin-ui-visible", adminUiVisible);
 
   if (!adminUiVisible) {
-        const encodedId = encodeURIComponent(currentAdId);
-        const res = await fetch(apiUrl(`/api/adverts/ads/${encodedId}/pay`), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            plan: planSelect.value,
-            featured: featuredCheckbox.checked,
-            email
+    setAdminEnabled(false);
+  }
+}
 
 async function validateAdminTokenOrThrow() {
   const token = String(adminToken || "").trim();
