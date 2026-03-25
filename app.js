@@ -254,7 +254,7 @@ function setupScrollEffects() {
 
 function completePreloader() {
   const elapsed = Date.now() - preloadStartedAt;
-  const minPreloadDuration = shouldFastLoadUi ? 120 : 650;
+  const minPreloadDuration = shouldFastLoadUi ? 60 : 240;
   const remaining = Math.max(0, minPreloadDuration - elapsed);
 
   window.setTimeout(() => {
@@ -471,8 +471,12 @@ document.addEventListener("keydown", (event) => {
 (async function init() {
   setupRevealObserver();
   setupScrollEffects();
-  await loadCategories();
-  await loadNews();
+
+  // Start fetching non-critical data but don't block initial paint.
+  loadCategories().catch(() => {});
+  loadNews().catch(() => {});
+
+  // Hide the preloader ASAP so the page becomes interactive faster.
   completePreloader();
 
   // Keep the feed fresh during active use.

@@ -24,9 +24,27 @@
     <div id="preloader" class="preloader" aria-hidden="true">
       <div class="preloader-panel">
         <p class="preloader-kicker">Kenyan Pharmacists Network</p>
+        <div class="preloader-logo-wrap" aria-hidden="true">
+          <svg class="preloader-logo" viewBox="0 0 96 96" width="96" height="96" role="img" aria-hidden="true">
+            <defs>
+              <linearGradient id="lg" x1="0" x2="1">
+                <stop offset="0" stop-color="#0d7a52" />
+                <stop offset="1" stop-color="#f09a3e" />
+              </linearGradient>
+              <mask id="m">
+                <rect width="96" height="96" fill="white" />
+                <rect class="mask-fill" x="0" y="0" width="96" height="96" fill="black" />
+              </mask>
+            </defs>
+            <g mask="url(#m)">
+              <circle cx="48" cy="48" r="36" fill="url(#lg)" />
+              <text x="48" y="56" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="28" fill="#fff">KP</text>
+            </g>
+          </svg>
+        </div>
         <h2>Preparing live pharmacy intelligence</h2>
-        <div class="preloader-track" role="presentation">
-          <span class="preloader-fill"></span>
+        <div class="preloader-track" role="presentation" aria-hidden="true">
+          <span class="preloader-fill" aria-hidden="true"></span>
         </div>
       </div>
     </div>

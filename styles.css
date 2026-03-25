@@ -73,7 +73,7 @@ body.is-loading {
   visibility: visible;
   contain: layout paint;
   will-change: opacity;
-  transition: opacity 0.55s ease, visibility 0.55s ease;
+  transition: opacity 0.32s ease, visibility 0.32s ease;
 }
 
 .preloader.is-hidden {
@@ -84,14 +84,14 @@ body.is-loading {
 
 .preloader-panel {
   width: min(520px, 90vw);
-  padding: 28px;
-  border-radius: 20px;
+  padding: 24px;
+  border-radius: 18px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.92);
   box-shadow: var(--shadow-strong);
   will-change: transform, opacity;
   transform: translateZ(0);
-  animation: rise 0.8s cubic-bezier(0.2, 0.9, 0.2, 1);
+  animation: rise 0.48s cubic-bezier(0.2, 0.9, 0.2, 1);
 }
 
 .preloader-kicker {
@@ -125,7 +125,7 @@ body.is-loading {
   background: linear-gradient(90deg, var(--brand), #2abb86, var(--brand-2));
   will-change: transform;
   transform: translateZ(0);
-  animation: loadSweep 1.2s linear infinite;
+  animation: loadSweep 0.9s linear infinite;
 }
 
 .preloader.is-hidden .preloader-fill {
@@ -139,6 +139,22 @@ body.is-loading {
   filter: blur(80px);
   opacity: 0.45;
   animation: drift 14s ease-in-out infinite alternate;
+}
+
+/* Pause background motion while loading to reduce CPU/paint cost */
+body.is-loading .bg-shape {
+  animation-play-state: paused;
+}
+
+/* Preloader SVG logo */
+.preloader-logo-wrap { display: block; text-align: center; margin-bottom: 12px; }
+.preloader-logo { width: 96px; height: 96px; display: inline-block; }
+.preloader .mask-fill { transform: translateY(0); will-change: transform; animation: preloaderFill 850ms cubic-bezier(.2,.9,.2,1) forwards; }
+.preloader.is-hidden .mask-fill { animation: none; }
+
+@keyframes preloaderFill {
+  from { transform: translateY(0); }
+  to { transform: translateY(-96px); }
 }
 
 .bg-shape-1 {
