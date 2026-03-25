@@ -43,9 +43,11 @@
           <h2 class="adverts-title">Active adverts</h2>
           <div class="adverts-feed-tools">
             <div id="adminPanel" class="adverts-admin-panel" hidden style="display:none">
-              <label class="sr-only" for="adminTokenInput">Admin token</label>
-              <input id="adminTokenInput" type="password" placeholder="Admin token" autocomplete="off" />
-              <button id="adminEnableBtn" class="btn btn-ghost" type="button">Admin</button>
+              <form id="adminTokenForm" onsubmit="return false;" style="display: flex; gap: 0.5em; align-items: center;">
+                <label class="sr-only" for="adminTokenInput">Admin token</label>
+                <input id="adminTokenInput" type="password" placeholder="Admin token" autocomplete="off" />
+                <button id="adminEnableBtn" class="btn btn-ghost" type="button">Admin</button>
+              </form>
             </div>
             <p id="feedStatus" class="adverts-hint"></p>
           </div>

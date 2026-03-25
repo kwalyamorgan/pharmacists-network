@@ -1,3 +1,8 @@
+// Enables or disables admin mode UI state
+function setAdminEnabled(nextEnabled) {
+  adminEnabled = Boolean(nextEnabled);
+  document.body.classList.toggle("admin-enabled", adminEnabled);
+}
 const advertiseBtn = document.getElementById("advertiseBtn");
 const featuredViewerBtn = document.getElementById("featuredViewerBtn");
 const adDialog = document.getElementById("adDialog");
