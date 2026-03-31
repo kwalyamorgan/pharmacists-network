@@ -38,7 +38,9 @@ const API_BASE = (() => {
   const useRailwayApi =
     hostname.endsWith("github.io") ||
     hostname === "kenyanpharmacistsnetwork.co.ke" ||
-    hostname === "www.kenyanpharmacistsnetwork.co.ke";
+    hostname === "www.kenyanpharmacistsnetwork.co.ke" ||
+    hostname === "kenyanhealthprofessionalsnetwork.co.ke" ||
+    hostname === "www.kenyanhealthprofessionalsnetwork.co.ke";
 
   return useRailwayApi
     ? "https://pharmacy-website-env.up.railway.app"
