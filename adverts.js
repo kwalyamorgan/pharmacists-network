@@ -210,6 +210,28 @@ function openExternalAdvertLink(url) {
   window.open(safeUrl, "_blank", "noopener,noreferrer");
 }
 
+// Open an external advert link and optionally increment the advert view count first.
+function openExternalAdvertLinkWithView(url, adId) {
+  const safeUrl = String(url || "").trim();
+  if (!safeUrl) return;
+
+  // If we have an advert id, try to increment views first (best-effort).
+  if (adId) {
+    fetch(apiUrl(`/api/adverts/ads/${encodeURIComponent(adId)}/view`), { method: "POST" }).finally(() => {
+      try {
+        window.open(safeUrl, "_blank", "noopener,noreferrer");
+      } catch (e) {
+        // ignore
+      }
+    });
+    return;
+  }
+
+  try {
+    window.open(safeUrl, "_blank", "noopener,noreferrer");
+  } catch (e) {}
+}
+
 function bindClickableDescription(el, url) {
   if (!el) {
     return;
@@ -423,7 +445,7 @@ function renderFeaturedSlide() {
       featuredPopupLink.onclick = (event) => {
         event.preventDefault();
         event.stopPropagation();
-        openExternalAdvertLink(url);
+        openExternalAdvertLinkWithView(url, item.id);
       };
     } else {
       featuredPopupLink.hidden = true;
@@ -954,7 +976,7 @@ function renderFeed(items) {
         linkEl.onclick = (event) => {
           event.preventDefault();
           event.stopPropagation();
-          openExternalAdvertLink(url);
+          openExternalAdvertLinkWithView(url, item.id);
         };
       } else {
         linkEl.hidden = true;
@@ -967,7 +989,19 @@ function renderFeed(items) {
     const meta = clone.querySelector("[data-meta]");
     const until = item.activeUntil ? new Date(item.activeUntil).toLocaleString() : "";
     if (meta) {
-      meta.textContent = until ? `Active until: ${until}` : "";
+      const views = Number(item.views) || 0;
+      const base = until ? `Active until: ${until}` : "";
+      meta.textContent = base ? `${base} • ${views} views` : `${views} views`;
+    }
+
+    const viewsWrapper = clone.querySelector("[data-views]");
+    const viewsCountEl = clone.querySelector(".adverts-views-count");
+    if (viewsCountEl) {
+      viewsCountEl.textContent = String(Number(item.views) || 0);
+      if (viewsWrapper) {
+        viewsWrapper.hidden = false;
+        try { viewsWrapper.style.display = "inline-flex"; } catch(e){}
+      }
     }
 
     const adminActions = clone.querySelector("[data-admin-actions]");

@@ -4,11 +4,6 @@ const sourceSelect = document.getElementById("sourceSelect");
 const regionSelect = document.getElementById("regionSelect");
 const dateFromInput = document.getElementById("dateFromInput");
 const dateToInput = document.getElementById("dateToInput");
-const filterToggleBtn = document.getElementById("filterToggleBtn");
-const filterMenu = document.getElementById("filterMenu");
-const closeFilterBtn = document.getElementById("closeFilterBtn");
-const applyFiltersBtn = document.getElementById("applyFiltersBtn");
-const resetFiltersBtn = document.getElementById("resetFiltersBtn");
 const newsFeed = document.getElementById("newsFeed");
 const statusText = document.getElementById("statusText");
 const updatedText = document.getElementById("updatedText");
@@ -17,7 +12,6 @@ const storyCount = document.getElementById("storyCount");
 const kenyanCount = document.getElementById("kenyanCount");
 const globalCount = document.getElementById("globalCount");
 const toolbar = document.querySelector(".toolbar");
-const preloader = document.getElementById("preloader");
 const scrollProgress = document.getElementById("scrollProgress");
 const backToTopBtn = document.getElementById("backToTopBtn");
 const studentsToggleBtn = document.getElementById("studentsToggleBtn");
@@ -29,6 +23,7 @@ let debounceTimer;
 let revealObserver;
 let scrollTicking = false;
 let newsRequestController = null;
+let currentCategory = "all";
 const preloadStartedAt = Date.now();
 const isCompactViewport = window.matchMedia("(max-width: 720px)").matches;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -56,15 +51,6 @@ function apiUrl(path) {
   return `${base}${normalizedPath}`;
 }
 
-function openFilterMenu() {
-  filterMenu.hidden = false;
-  filterToggleBtn.setAttribute("aria-expanded", "true");
-}
-
-function closeFilterMenu() {
-  filterMenu.hidden = true;
-  filterToggleBtn.setAttribute("aria-expanded", "false");
-}
 
 function openStudentsPanel() {
   if (!studentsToggleBtn || !studentsPanel) {
@@ -135,6 +121,60 @@ function updateMetrics(items) {
   globalCount.textContent = String(global);
 }
 
+// Quick filter helpers (mobile-first)
+function formatInputDateLocal(d) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function applyDatePreset(preset) {
+  const now = new Date();
+  let from = "";
+  let to = "";
+
+  if (preset === "today") {
+    from = to = formatInputDateLocal(now);
+  } else if (preset === "this-week") {
+    const day = now.getDay();
+    const mondayOffset = (day + 6) % 7; // Monday as first day
+    const start = new Date(now);
+    start.setDate(now.getDate() - mondayOffset);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    from = formatInputDateLocal(start);
+    to = formatInputDateLocal(end);
+  } else if (preset === "this-month") {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    from = formatInputDateLocal(start);
+    to = formatInputDateLocal(end);
+  } else if (preset === "this-year") {
+    const start = new Date(now.getFullYear(), 0, 1);
+    const end = new Date(now.getFullYear(), 11, 31);
+    from = formatInputDateLocal(start);
+    to = formatInputDateLocal(end);
+  } else if (preset === "last-year") {
+    const start = new Date(now.getFullYear() - 1, 0, 1);
+    const end = new Date(now.getFullYear() - 1, 11, 31);
+    from = formatInputDateLocal(start);
+    to = formatInputDateLocal(end);
+  } else if (preset === "all-time") {
+    from = "";
+    to = "";
+  }
+
+  if (dateFromInput) dateFromInput.value = from;
+  if (dateToInput) dateToInput.value = to;
+  loadNews();
+}
+
+function setActiveButton(groupSelector, activeBtn) {
+  try {
+    document.querySelectorAll(groupSelector).forEach((b) => b.classList.remove("is-active"));
+    activeBtn && activeBtn.classList.add("is-active");
+  } catch (e) {}
+}
+
 function renderEmpty(message, className = "empty") {
   clearFeed();
   const block = document.createElement("div");
@@ -169,8 +209,31 @@ function renderNews(items) {
     clone.querySelector(".source").textContent = item.source;
     clone.querySelector(".region").textContent = item.region;
 
+    const viewsEl = clone.querySelector(".views-count");
+    if (viewsEl) {
+      viewsEl.textContent = String(item.views || 0);
+    }
+
     const link = clone.querySelector(".read-link");
     link.href = item.link;
+    // Increment view count when user opens the story (best-effort, fire-and-forget).
+    link.addEventListener("click", (ev) => {
+      try {
+        // Fire-and-forget; don't block navigation.
+        fetch(apiUrl("/api/news/view"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ link: item.link })
+        })
+          .then((r) => r.json())
+          .then((d) => {
+            if (d && typeof d.views !== "undefined" && viewsEl) {
+              viewsEl.textContent = String(d.views);
+            }
+          })
+          .catch(() => {});
+      } catch (e) {}
+    });
 
     fragment.appendChild(clone);
   });
@@ -251,31 +314,7 @@ function setupScrollEffects() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 }
-
-function completePreloader() {
-  const elapsed = Date.now() - preloadStartedAt;
-  const minPreloadDuration = shouldFastLoadUi ? 60 : 240;
-  const remaining = Math.max(0, minPreloadDuration - elapsed);
-
-  window.setTimeout(() => {
-    preloader.classList.add("is-hidden");
-    document.body.classList.remove("is-loading");
-
-    const finalize = () => {
-      preloader.style.display = "none";
-    };
-
-    const onTransitionEnd = (event) => {
-      if (event.target === preloader && event.propertyName === "opacity") {
-        preloader.removeEventListener("transitionend", onTransitionEnd);
-        finalize();
-      }
-    };
-
-    preloader.addEventListener("transitionend", onTransitionEnd);
-    window.setTimeout(finalize, 800);
-  }, remaining);
-}
+// preloader removed — no preloader animation. Page loads immediately.
 
 async function loadCategories() {
   try {
@@ -303,19 +342,23 @@ async function loadCategories() {
       return [...map.values()].sort();
     })();
 
-    uniqueCategories.forEach((category) => {
-      const option = document.createElement("option");
-      option.value = category.toLowerCase();
-      option.textContent = category;
-      categorySelect.appendChild(option);
-    });
+    if (categorySelect) {
+      uniqueCategories.forEach((category) => {
+        const option = document.createElement("option");
+        option.value = category.toLowerCase();
+        option.textContent = category;
+        categorySelect.appendChild(option);
+      });
+    }
 
-    uniqueSources.forEach((source) => {
-      const option = document.createElement("option");
-      option.value = source.toLowerCase();
-      option.textContent = source;
-      sourceSelect.appendChild(option);
-    });
+    if (sourceSelect) {
+      uniqueSources.forEach((source) => {
+        const option = document.createElement("option");
+        option.value = source.toLowerCase();
+        option.textContent = source;
+        sourceSelect.appendChild(option);
+      });
+    }
   } catch (error) {
     setStatus("Sources could not be loaded. Showing default filters.");
   }
@@ -332,12 +375,14 @@ async function loadNews() {
 
     const defaultLimit = isCompactViewport ? 80 : 160;
 
-    const q = encodeURIComponent(searchInput.value.trim());
-    const category = encodeURIComponent(categorySelect.value);
-    const source = encodeURIComponent(sourceSelect.value);
-    const region = encodeURIComponent(regionSelect.value);
-    const dateFrom = encodeURIComponent(dateFromInput.value);
-    const dateTo = encodeURIComponent(dateToInput.value);
+    const q = encodeURIComponent((searchInput && searchInput.value || "").trim());
+    const activeCategoryBtn = document.querySelector('.category-btn.is-active');
+    const category = encodeURIComponent((activeCategoryBtn && activeCategoryBtn.dataset.category) || (categorySelect && categorySelect.value) || currentCategory || "all");
+    const source = encodeURIComponent((sourceSelect && sourceSelect.value) || "all");
+    const activeRegionBtn = document.querySelector('.region-btn.is-active');
+    const region = encodeURIComponent((activeRegionBtn && activeRegionBtn.dataset.region) || (regionSelect && regionSelect.value) || "all");
+    const dateFrom = encodeURIComponent((dateFromInput && dateFromInput.value) || "");
+    const dateTo = encodeURIComponent((dateToInput && dateToInput.value) || "");
     const response = await fetch(
       apiUrl(
         `/api/news?q=${q}&category=${category}&source=${source}&region=${region}&dateFrom=${dateFrom}&dateTo=${dateTo}&limit=${defaultLimit}`
@@ -390,35 +435,67 @@ function validateDateRange() {
 }
 
 function resetFilters() {
-  categorySelect.value = "all";
-  sourceSelect.value = "all";
-  regionSelect.value = "all";
-  dateFromInput.value = "";
-  dateToInput.value = "";
+  if (categorySelect) categorySelect.value = "all";
+  if (sourceSelect) sourceSelect.value = "all";
+  if (regionSelect) regionSelect.value = "all";
+  if (dateFromInput) dateFromInput.value = "";
+  if (dateToInput) dateToInput.value = "";
+  setActiveButton('.region-btn', document.querySelector('.region-btn[data-region="all"]'));
+  setActiveButton('.date-btn', document.querySelector('.date-btn[data-preset="all-time"]'));
+  setActiveButton('.category-btn', document.querySelector('.category-btn[data-category="all"]'));
+  currentCategory = "all";
 }
 
 searchInput.addEventListener("input", debouncedLoadNews);
 
-filterToggleBtn.addEventListener("click", () => {
-  if (filterMenu.hidden) {
-    openFilterMenu();
-  } else {
-    closeFilterMenu();
+if (kenyanCount) {
+  kenyanCount.style.cursor = "pointer";
+  kenyanCount.addEventListener("click", () => {
+    const btn = document.querySelector('.region-btn[data-region="kenyan"]');
+    if (btn) setActiveButton('.region-btn', btn);
+    if (regionSelect) regionSelect.value = "kenyan";
+    loadNews();
+  });
+}
+
+if (globalCount) {
+  globalCount.style.cursor = "pointer";
+  globalCount.addEventListener("click", () => {
+    const btn = document.querySelector('.region-btn[data-region="global"]');
+    if (btn) setActiveButton('.region-btn', btn);
+    if (regionSelect) regionSelect.value = "global";
+    loadNews();
+  });
+}
+
+// Wire up quick filter buttons (region + date presets)
+document.addEventListener("click", (ev) => {
+  const btn = ev.target.closest && ev.target.closest(".region-btn, .date-btn, .category-btn");
+  if (!btn) return;
+  if (btn.classList.contains("region-btn")) {
+    const region = String(btn.dataset.region || "all").trim();
+    if (regionSelect) regionSelect.value = region;
+    setActiveButton(".region-btn", btn);
+    loadNews();
+    return;
+  }
+  if (btn.classList.contains("category-btn")) {
+    const cat = String(btn.dataset.category || "all").trim();
+    currentCategory = cat;
+    if (categorySelect) categorySelect.value = cat;
+    setActiveButton(".category-btn", btn);
+    loadNews();
+    return;
+  }
+  if (btn.classList.contains("date-btn")) {
+    const preset = String(btn.dataset.preset || "");
+    setActiveButton(".date-btn", btn);
+    applyDatePreset(preset);
+    return;
   }
 });
 
-closeFilterBtn.addEventListener("click", closeFilterMenu);
-
-applyFiltersBtn.addEventListener("click", () => {
-  validateDateRange();
-  loadNews();
-  closeFilterMenu();
-});
-
-resetFiltersBtn.addEventListener("click", () => {
-  resetFilters();
-  loadNews();
-});
+// Filter menu removed — apply/reset handlers removed.
 
 if (studentsToggleBtn && studentsPanel) {
   studentsToggleBtn.addEventListener("click", () => {
@@ -442,29 +519,15 @@ if (pharmacistsToggleBtn && pharmacistsPanel) {
   });
 }
 
-document.addEventListener("click", (event) => {
-  if (filterMenu.hidden) {
-    return;
-  }
-
-  if (event.target === filterToggleBtn || filterMenu.contains(event.target)) {
-    return;
-  }
-
-  closeFilterMenu();
-});
-
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !filterMenu.hidden) {
-    closeFilterMenu();
-  }
+  if (event.key === "Escape") {
+    if (studentsPanel && !studentsPanel.hidden) {
+      closeStudentsPanel();
+    }
 
-  if (event.key === "Escape" && studentsPanel && !studentsPanel.hidden) {
-    closeStudentsPanel();
-  }
-
-  if (event.key === "Escape" && pharmacistsPanel && !pharmacistsPanel.hidden) {
-    closePharmacistsPanel();
+    if (pharmacistsPanel && !pharmacistsPanel.hidden) {
+      closePharmacistsPanel();
+    }
   }
 });
 
@@ -472,12 +535,18 @@ document.addEventListener("keydown", (event) => {
   setupRevealObserver();
   setupScrollEffects();
 
+  // Default quick-filter active buttons
+  try {
+    setActiveButton('.region-btn', document.querySelector('.region-btn[data-region="all"]'));
+    setActiveButton('.date-btn', document.querySelector('.date-btn[data-preset="all-time"]'));
+    setActiveButton('.category-btn', document.querySelector('.category-btn[data-category="all"]'));
+  } catch (e) {}
+
   // Start fetching non-critical data but don't block initial paint.
   loadCategories().catch(() => {});
   loadNews().catch(() => {});
 
-  // Hide the preloader ASAP so the page becomes interactive faster.
-  completePreloader();
+  // Preloader removed — no action needed to hide it.
 
   // Keep the feed fresh during active use.
   setInterval(loadNews, 10 * 60 * 1000);

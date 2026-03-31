@@ -20,35 +20,7 @@
     })(window, document, "clarity", "script", "vz3d95rsrb");
 </script>
   </head>
-  <body class="is-loading">
-    <div id="preloader" class="preloader" aria-hidden="true">
-      <div class="preloader-panel">
-        <p class="preloader-kicker">Kenyan Pharmacists Network</p>
-        <div class="preloader-logo-wrap" aria-hidden="true">
-          <svg class="preloader-logo" viewBox="0 0 96 96" width="96" height="96" role="img" aria-hidden="true">
-            <defs>
-              <linearGradient id="lg" x1="0" x2="1">
-                <stop offset="0" stop-color="#0d7a52" />
-                <stop offset="1" stop-color="#f09a3e" />
-              </linearGradient>
-              <mask id="m">
-                <rect width="96" height="96" fill="white" />
-                <rect class="mask-fill" x="0" y="0" width="96" height="96" fill="black" />
-              </mask>
-            </defs>
-            <g mask="url(#m)">
-              <circle cx="48" cy="48" r="36" fill="url(#lg)" />
-              <text x="48" y="56" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="28" fill="#fff">KP</text>
-            </g>
-          </svg>
-        </div>
-        <h2>Preparing live pharmacy intelligence</h2>
-        <div class="preloader-track" role="presentation" aria-hidden="true">
-          <span class="preloader-fill" aria-hidden="true"></span>
-        </div>
-      </div>
-    </div>
-
+  <body>
     <div id="scrollProgress" class="scroll-progress" aria-hidden="true"></div>
     <div class="bg-shape bg-shape-1"></div>
     <div class="bg-shape bg-shape-2"></div>
@@ -143,63 +115,32 @@
           <label class="sr-only" for="searchInput">Search</label>
           <input id="searchInput" class="toolbar-search" type="text" placeholder="Search: diabetes, regulation, trial" />
         </div>
-        <button id="filterToggleBtn" class="btn btn-filter" type="button" aria-expanded="false" aria-controls="filterMenu">
-          Filter
-        </button>
 
         <a class="btn btn-filter" href="adverts.html">Adverts</a>
+      </section>
 
-        <div id="filterMenu" class="filter-menu" role="dialog" aria-label="Filter options" hidden>
-          <div class="filter-menu-head">
-            <p class="controls-kicker">Filter by</p>
-            <button id="closeFilterBtn" class="menu-close" type="button" aria-label="Close filters">Close</button>
-          </div>
+      <section class="quick-filters reveal-block" aria-label="Quick filters">
+        <div class="filters-row region-filters" role="tablist" aria-label="Region filters">
+          <button type="button" class="btn btn-ghost region-btn" data-region="all">All</button>
+          <button type="button" class="btn region-btn" data-region="kenyan">Kenyan</button>
+          <button type="button" class="btn region-btn" data-region="global">Global</button>
+        </div>
 
-          <div class="filter-grid">
-            <div class="field">
-              <label for="categorySelect">Category</label>
-              <select id="categorySelect">
-                <option value="all">All categories</option>
-              </select>
-            </div>
+        <div class="filters-row category-filters" role="tablist" aria-label="Category filters">
+          <button type="button" class="btn btn-ghost category-btn" data-category="all">All</button>
+          <button type="button" class="btn category-btn" data-category="research">Research</button>
+          <button type="button" class="btn category-btn" data-category="industry">Industry</button>
+          <button type="button" class="btn category-btn" data-category="market">Market</button>
+          <button type="button" class="btn category-btn" data-category="policy">Policy</button>
+        </div>
 
-            <div class="field">
-              <label for="sourceSelect">Source</label>
-              <select id="sourceSelect">
-                <option value="all">All sources</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="regionSelect">Region</label>
-              <select id="regionSelect">
-                <option value="all">Kenyan + Global</option>
-                <option value="kenyan">Kenyan</option>
-                <option value="global">Global</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="dateFromInput">
-                From date
-                <span class="label-hint">dd/mm/yyyy</span>
-              </label>
-              <input id="dateFromInput" type="date" />
-            </div>
-
-            <div class="field">
-              <label for="dateToInput">
-                To date
-                <span class="label-hint">dd/mm/yyyy</span>
-              </label>
-              <input id="dateToInput" type="date" />
-            </div>
-          </div>
-
-          <div class="filter-actions">
-            <button id="resetFiltersBtn" class="btn btn-ghost" type="button">Reset</button>
-            <button id="applyFiltersBtn" class="btn" type="button">Apply filters</button>
-          </div>
+        <div class="filters-row date-filters" role="tablist" aria-label="Date presets">
+          <button type="button" class="btn btn-ghost date-btn" data-preset="today">Today</button>
+          <button type="button" class="btn btn-ghost date-btn" data-preset="this-week">This week</button>
+          <button type="button" class="btn btn-ghost date-btn" data-preset="this-month">This month</button>
+          <button type="button" class="btn btn-ghost date-btn" data-preset="this-year">This year</button>
+          <button type="button" class="btn btn-ghost date-btn" data-preset="last-year">Last year</button>
+          <button type="button" class="btn btn-ghost date-btn" data-preset="all-time">All time</button>
         </div>
       </section>
 
@@ -238,6 +179,13 @@
           <span class="source-line">
             <span class="source"></span>
             <span class="region"></span>
+          </span>
+          <span class="views-line">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M12 5c-7 0-11 6-11 7s4 7 11 7 11-6 11-7-4-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
+              <circle cx="12" cy="12" r="2" fill="currentColor" />
+            </svg>
+            <span class="views-count">0</span>
           </span>
           <a class="read-link" target="_blank" rel="noopener noreferrer">Read story</a>
         </div>
